@@ -1,7 +1,7 @@
 /**
  * Created by Macsnow on 2017/2/24.
  */
-import init.GreetingController;
+import seed.web.GreetingController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

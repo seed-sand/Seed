@@ -12,7 +12,7 @@
 hs_err_pid*
 
 # Idea
-.idea/**/workspace.xml
-.idea/**/tasks.xml
+.idea
+*.iml
 
-/out/
+target

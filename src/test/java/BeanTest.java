@@ -2,7 +2,7 @@
  * Created by Macsnow on 2017/2/24.
  */
 
-import init.ABeanOfGreeting;
+import seed.domain.ABeanOfGreeting;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
