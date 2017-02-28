@@ -127,3 +127,67 @@
 
 微信、微博、GitHub
 
+## 文档结构
+
+### User
+
+```python
+user = {
+  "id": str,
+  "email": str,
+  "wechatOpenId": str,
+  "username": str,
+  "password": str,
+  "created": list(str),
+  "joined": list(str)
+}
+```
+
+
+
+### Objective
+
+```python
+objective = {
+  "id": str,
+  "userId": str,
+  "groupId": str,
+  "title": str,
+  "descript": str,
+  "deadline": str,
+  "priority": int,
+  "scope": str,
+  "status": str,
+  "assignment": list(str),
+  "watchedBy": list(str),
+  "comments": list(Comment),
+}
+```
+
+
+
+### Objective Group
+
+```python
+objective = {
+  "id": str,
+  "title": str,
+  "description": str,
+  "objectives": list(str),
+  "scope": str
+}
+```
+
+
+
+### comment
+
+```python
+comment = {
+  "userId": str,
+  "content": str
+}
+```
+
+
+
