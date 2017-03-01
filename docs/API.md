@@ -16,6 +16,8 @@ API设计文档
 /users
 ```
 
+**权限** ：未登入状态
+
 **参数**
 
 | 字段       | 类型     | 描述   | 是否必要 |
@@ -54,6 +56,8 @@ API设计文档
 /users/password
 ```
 
+**权限**：用户已登入
+
 参数
 
 | 字段           | 类型     | 描述   | 是否必要 |
@@ -89,6 +93,8 @@ API设计文档
 /users/profile
 ```
 
+**权限**：全体
+
 参数
 
 成功（200）
@@ -104,11 +110,15 @@ API设计文档
 
 > 应用Spring `Pageable`接口
 
+> 用户检索的用处是什么？--ASKED BY FROGGY
+
 `GET`
 
 ```
 /users
 ```
+
+**权限**：
 
 参数
 
@@ -136,6 +146,8 @@ API设计文档
 /users/log-out
 ```
 
+**权限**：用户已登入
+
 成功（200）
 
 | 字段   | 类型     | 描述   |
@@ -151,6 +163,8 @@ API设计文档
 ```
 /users/log-in
 ```
+
+**权限**：用户未登入
 
 参数
 
@@ -168,10 +182,10 @@ API设计文档
 
 请求失败（400）
 
-| 名称       | 类型     | 描述        |
-| -------- | ------ | --------- |
-| username | String | 用户名不存在    |
-| password | String | 用户名与密码不匹配 |
+| 名称       | 类型     | 描述     |
+| -------- | ------ | ------ |
+| username | String | 用户名不存在 |
+| password | String | 密码错误   |
 
 
 
@@ -182,6 +196,10 @@ API设计文档
 ```
 /users/:userId
 ```
+
+> 用户详细信息与用户个人信息的差别？？？---FROGGY
+
+**权限**：用户已登入
 
 参数
 
@@ -207,6 +225,8 @@ API设计文档
 ```
 /objectives
 ```
+
+**权限**：用户已登入
 
 参数
 
@@ -241,6 +261,8 @@ API设计文档
 /objectives/:objectiveId
 ```
 
+**权限**：用户已登入
+
 参数
 
 | 字段          | 类型     | 描述   | 是否必要 |
@@ -248,6 +270,12 @@ API设计文档
 | objectiveId | String | 目标ID | 是    |
 
 成功（204）
+
+请求失败（401）
+
+| 字段          | 类型     | 描述     |
+| ----------- | ------ | ------ |
+| objectiveId | String | 删除权限不够 |
 
 
 
@@ -260,6 +288,8 @@ API设计文档
 ```
 /objectives/:objectiveId
 ```
+
+**权限**：用户已登入
 
 参数
 
@@ -280,21 +310,24 @@ API设计文档
 | code       | Number    | 0       |
 | objectives | Objective | 被修改目标文档 |
 
-请求失败（400）
+请求失败（400&401）
 
-| 名称      | 类型    | 描述     |
-| ------- | ----- | ------ |
-| Require | Array | 必填字段缺失 |
+| 名称          | 类型     | 描述     |
+| ----------- | ------ | ------ |
+| Require     | Array  | 必填字段缺失 |
+| objectiveId | String | 修改权限不够 |
 
 
 
-### Objective - 检索目标
+### Objective - 检索目标（暂时用不上）
 
 `GET`
 
 ```
 /objectives
 ```
+
+**权限**：用户已登入
 
 参数
 
@@ -313,6 +346,12 @@ API设计文档
 | code       | Number      | 0      |
 | objectives | Objective[] | 目标文档列表 |
 
+请求失败（400）
+
+| 字段   | 类型     | 描述    |
+| ---- | ------ | ----- |
+| key  | String | 无相关内容 |
+
 
 
 ### Objective - 目标详细信息
@@ -322,6 +361,8 @@ API设计文档
 ```
 /objectives/:objectiveId
 ```
+
+**权限**：全体
 
 参数
 
@@ -371,6 +412,8 @@ API设计文档
 /objectives/:objectiveId/assignments
 ```
 
+**权限**：用户已登入
+
 参数
 
 | 字段          | 类型     | 描述   | 是否必要 |
@@ -385,6 +428,12 @@ API设计文档
 | code      | Number    | 0    |
 | objective | Objective | 目标文档 |
 
+错误（401）
+
+| 字段          | 类型     | 描述     |
+| ----------- | ------ | ------ |
+| objectiveId | String | 加入权限不够 |
+
 
 
 ### Objective - 离开目标
@@ -394,6 +443,8 @@ API设计文档
 ```
 /objectives/:objectiveId/assignments
 ```
+
+权限：用户已登入
 
 参数
 
@@ -417,6 +468,8 @@ API设计文档
 ```
 /objectives/:objectiveId/comments
 ```
+
+权限：用户已登入
 
 参数
 
@@ -443,6 +496,8 @@ API设计文档
 ```
 /objectiveLists
 ```
+
+权限：用户已登入
 
 参数
 
@@ -481,6 +536,12 @@ API设计文档
 
 成功（204）
 
+请求失败（401）
+
+| 字段              | 类型     | 描述     |
+| --------------- | ------ | ------ |
+| objectiveListId | String | 删除权限不够 |
+
 
 
 ### ObjectiveList - 修改分组
@@ -490,6 +551,8 @@ API设计文档
 ```
 /objectiveLists/:objectiveListId
 ```
+
+权限：用户已登入
 
 参数
 
@@ -513,7 +576,13 @@ API设计文档
 | ------- | ----- | ------ |
 | Require | Array | 必填字段缺失 |
 
-### ObjectiveList - 检索分组
+请求失败（401）
+
+| 字段              | 类型     | 描述     |
+| --------------- | ------ | ------ |
+| objectiveListId | String | 修改权限不够 |
+
+### ObjectiveList - 检索分组（暂时用不上）
 
 `GET`
 
@@ -585,11 +654,11 @@ API设计文档
 | code          | Number        | 0    |
 | objectiveList | ObjectiveList | 分组文档 |
 
-请求失败（400）
+请求失败（401）
 
-| 名称      | 类型    | 描述     |
-| ------- | ----- | ------ |
-| Require | Array | 必填字段缺失 |
+| 字段              | 类型     | 描述     |
+| --------------- | ------ | ------ |
+| objectiveListId | String | 添加权限不够 |
 
 ### ObjectiveList - 移除目标
 
@@ -613,3 +682,8 @@ API设计文档
 | code          | Number        | 0    |
 | objectiveList | ObjectiveList | 分组文档 |
 
+请求失败（401）
+
+| 字段              | 类型     | 描述     |
+| --------------- | ------ | ------ |
+| objectiveListId | String | 移除权限不够 |
