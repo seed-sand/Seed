@@ -75,6 +75,10 @@ API设计文档
 | ------- | ----- | ------ |
 | require | Array | 必填字段缺失 |
 
+| 名称           | 类型     | 描述   |
+| ------------ | ------ | ---- |
+| old_password | String | 密码错误 |
+
 
 
 ###  User - 用户个人信息
@@ -162,6 +166,13 @@ API设计文档
 | code | Number | 0    |
 | user | User   | 用户文档 |
 
+请求失败（400）
+
+| 名称       | 类型     | 描述        |
+| -------- | ------ | --------- |
+| username | String | 用户名不存在    |
+| password | String | 用户名与密码不匹配 |
+
 
 
 ### User - 用户详细信息
@@ -205,7 +216,7 @@ API设计文档
 | description | String   | 描述   | 否    |
 | deadline    | DateTime | 截止时间 | 否    |
 | priority    | Number   | 优先级  | 否    |
-| scope       | String   | 范围   | 是    |
+| scope       | Boolean  | 范围   | 是    |
 
 成功（201）
 
@@ -213,6 +224,12 @@ API设计文档
 | --------- | --------- | ---- |
 | code      | Number    | 0    |
 | objective | Objective | 目标文档 |
+
+请求失败（400）
+
+| 名称      | 类型    | 描述     |
+| ------- | ----- | ------ |
+| require | Array | 必填字段缺失 |
 
 
 
@@ -253,7 +270,7 @@ API设计文档
 | description | String   | 描述   | 否    |
 | deadline    | DateTime | 截止时间 | 否    |
 | priority    | Number   | 优先级  | 否    |
-| scope       | String   | 范围   | 否    |
+| scope       | Boolean  | 范围   | 否    |
 | status      | String   | 完成状态 | 否    |
 
 成功（201）
@@ -262,6 +279,12 @@ API设计文档
 | ---------- | --------- | ------- |
 | code       | Number    | 0       |
 | objectives | Objective | 被修改目标文档 |
+
+请求失败（400）
+
+| 名称      | 类型    | 描述     |
+| ------- | ----- | ------ |
+| Require | Array | 必填字段缺失 |
 
 
 
@@ -436,7 +459,11 @@ API设计文档
 | code          | Number        | 0      |
 | objectiveList | ObjectiveList | 目标分组文档 |
 
+请求失败（400）
 
+| 名称      | 类型    | 描述     |
+| ------- | ----- | ------ |
+| Require | Array | 必填字段缺失 |
 
 ### ObjectiveList - 删除分组
 
@@ -480,7 +507,11 @@ API设计文档
 | code          | Number        | 0          |
 | objectiveList | ObjectiveList | 被修改的目标分组文档 |
 
+请求失败（400）
 
+| 名称      | 类型    | 描述     |
+| ------- | ----- | ------ |
+| Require | Array | 必填字段缺失 |
 
 ### ObjectiveList - 检索分组
 
@@ -554,7 +585,11 @@ API设计文档
 | code          | Number        | 0    |
 | objectiveList | ObjectiveList | 分组文档 |
 
+请求失败（400）
 
+| 名称      | 类型    | 描述     |
+| ------- | ----- | ------ |
+| Require | Array | 必填字段缺失 |
 
 ### ObjectiveList - 移除目标
 
