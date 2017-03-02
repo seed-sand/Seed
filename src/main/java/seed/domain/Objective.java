@@ -1,10 +1,13 @@
 package seed.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.List;
 
@@ -15,6 +18,7 @@ import java.util.List;
 @Document
 public class Objective {
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
 
     @Indexed
@@ -25,6 +29,7 @@ public class Objective {
 
     private String title;
     private String description;
+
     private DateTime deadline;
     private int priority;
     private boolean status;

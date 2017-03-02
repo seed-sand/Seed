@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import seed.domain.Objective;
 
 import java.awt.print.Pageable;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,6 +14,6 @@ import java.util.List;
  */
 public interface ObjectiveListRepository extends MongoRepository<Objective,ObjectId>{
     Objective findById(ObjectId id);
-    List<Objective> findByUserId(Objective userId, Pageable pageable);
-    List<Objective> findByTitleIgnoreCase(String title, Pageable pageable);
+    Collection<Objective> findByUserId(Objective userId, Pageable pageable);
+    Collection<Objective> findByTitleIgnoreCase(String title, Pageable pageable);
 }

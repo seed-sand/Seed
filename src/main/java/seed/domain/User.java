@@ -1,8 +1,11 @@
 package seed.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 import org.bson.types.ObjectId;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,13 +22,15 @@ import java.util.List;
 public class User {
 
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
 
-    @JsonIgnore
+    @NotBlank
     private String password;
     private String username;
 
     @Indexed(unique = true)
+    @Email
     private String email;
 
     @Indexed(unique = true)
@@ -35,10 +40,10 @@ public class User {
     private List<ObjectId> ObjectiveCreated;
     private List<ObjectId> ObjectiveJoined;
 
-    public User(String username, String identity, String password, boolean wechatCreate) {
+    public User(String username, String identity, String password, boolean useWechat) {
         this.username = username;
         this.password = password;
-        if(wechatCreate) {
+        if(useWechat) {
             this.openId = identity;
         } else {
             this.email = identity;

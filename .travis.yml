@@ -5,5 +5,9 @@ install:
   - mvn install
 script:
   - mvn test
+cache:
+  directoires:
+  - .autoconf
+  - $HOME/.m2
 services:
   - mongodb
