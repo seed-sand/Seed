@@ -136,6 +136,7 @@ user = {
   "id": str,
   "email": str,
   "wechatOpenId": str,
+  "avatar": str,
   "username": str,
   "password": str,
   "created": list(str),
@@ -153,13 +154,12 @@ objective = {
   "userId": str,
   "groupId": str,
   "title": str,
-  "descript": str,
+  "description": str,
   "deadline": str,
   "priority": int,
   "scope": str,
   "status": str,
   "assignment": list(str),
-  "watchedBy": list(str),
   "comments": list(Comment),
 }
 ```
@@ -171,6 +171,7 @@ objective = {
 ```python
 objective = {
   "id": str,
+  "userId": str,
   "title": str,
   "description": str,
   "objectives": list(str),

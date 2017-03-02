@@ -16,6 +16,8 @@ API设计文档
 /users
 ```
 
+**权限** ：未登入状态
+
 **参数**
 
 | 字段       | 类型     | 描述   | 是否必要 |
@@ -54,6 +56,8 @@ API设计文档
 /users/password
 ```
 
+**权限**：用户已登入
+
 参数
 
 | 字段           | 类型     | 描述   | 是否必要 |
@@ -75,6 +79,10 @@ API设计文档
 | ------- | ----- | ------ |
 | require | Array | 必填字段缺失 |
 
+| 名称           | 类型     | 描述   |
+| ------------ | ------ | ---- |
+| old_password | String | 密码错误 |
+
 
 
 ###  User - 用户个人信息
@@ -84,6 +92,8 @@ API设计文档
 ```
 /users/profile
 ```
+
+**权限**：全体
 
 参数
 
@@ -100,11 +110,15 @@ API设计文档
 
 > 应用Spring `Pageable`接口
 
+> 用户检索的用处是什么？--ASKED BY FROGGY
+
 `GET`
 
 ```
 /users
 ```
+
+**权限**：
 
 参数
 
@@ -132,6 +146,8 @@ API设计文档
 /users/log-out
 ```
 
+**权限**：用户已登入
+
 成功（200）
 
 | 字段   | 类型     | 描述   |
@@ -148,6 +164,8 @@ API设计文档
 /users/log-in
 ```
 
+**权限**：用户未登入
+
 参数
 
 | 字段       | 类型     | 描述   | 是否必要 |
@@ -162,28 +180,12 @@ API设计文档
 | code | Number | 0    |
 | user | User   | 用户文档 |
 
+请求失败（400）
 
-
-### User - 用户详细信息
-
-`GET`
-
-```
-/users/:userId
-```
-
-参数
-
-| 字段     | 类型     | 描述   | 是否必要 |
-| ------ | ------ | ---- | ---- |
-| userId | String | 用户ID | 是    |
-
-成功（200）
-
-| 字段   | 类型     | 描述   |
-| ---- | ------ | ---- |
-| code | Number | 0    |
-| user | User   | 用户文档 |
+| 名称       | 类型     | 描述     |
+| -------- | ------ | ------ |
+| username | String | 用户名不存在 |
+| password | String | 密码错误   |
 
 
 
@@ -197,6 +199,8 @@ API设计文档
 /objectives
 ```
 
+**权限**：用户已登入
+
 参数
 
 | 字段          | 类型       | 描述   | 是否必要 |
@@ -205,7 +209,6 @@ API设计文档
 | description | String   | 描述   | 否    |
 | deadline    | DateTime | 截止时间 | 否    |
 | priority    | Number   | 优先级  | 否    |
-| scope       | String   | 范围   | 是    |
 
 成功（201）
 
@@ -213,6 +216,12 @@ API设计文档
 | --------- | --------- | ---- |
 | code      | Number    | 0    |
 | objective | Objective | 目标文档 |
+
+请求失败（400）
+
+| 名称      | 类型    | 描述     |
+| ------- | ----- | ------ |
+| require | Array | 必填字段缺失 |
 
 
 
@@ -224,6 +233,8 @@ API设计文档
 /objectives/:objectiveId
 ```
 
+**权限**：用户已登入
+
 参数
 
 | 字段          | 类型     | 描述   | 是否必要 |
@@ -231,6 +242,12 @@ API设计文档
 | objectiveId | String | 目标ID | 是    |
 
 成功（204）
+
+请求失败（401）
+
+| 字段          | 类型     | 描述     |
+| ----------- | ------ | ------ |
+| objectiveId | String | 删除权限不够 |
 
 
 
@@ -244,6 +261,8 @@ API设计文档
 /objectives/:objectiveId
 ```
 
+**权限**：用户已登入
+
 参数
 
 | 字段          | 类型       | 描述   | 是否必要 |
@@ -253,8 +272,7 @@ API设计文档
 | description | String   | 描述   | 否    |
 | deadline    | DateTime | 截止时间 | 否    |
 | priority    | Number   | 优先级  | 否    |
-| scope       | String   | 范围   | 否    |
-| status      | String   | 完成状态 | 否    |
+| status      | Boolean  | 完成状态 | 否    |
 
 成功（201）
 
@@ -262,6 +280,13 @@ API设计文档
 | ---------- | --------- | ------- |
 | code       | Number    | 0       |
 | objectives | Objective | 被修改目标文档 |
+
+请求失败（400&401）
+
+| 名称          | 类型     | 描述     |
+| ----------- | ------ | ------ |
+| Require     | Array  | 必填字段缺失 |
+| objectiveId | String | 修改权限不够 |
 
 
 
@@ -273,15 +298,18 @@ API设计文档
 /objectives
 ```
 
+**权限**：用户已登入
+
 参数
 
-| 字段    | 类型     | 描述    | 是否必要 |
-| ----- | ------ | ----- | ---- |
-| page  | Number | 分页码   | 否    |
-| limit | Number | 每页容量  | 是    |
-| sort  | String | 排序关键字 | 否    |
-| key   | String | 检索关键字 | 否    |
-| scope | String | 检索范围  | 是    |
+| 字段       | 类型      | 描述     | 是否必要 |
+| -------- | ------- | ------ | ---- |
+| page     | Number  | 分页码    | 否    |
+| limit    | Number  | 每页容量   | 是    |
+| sort     | String  | 排序关键字  | 否    |
+| key      | String  | 检索关键字  | 否    |
+| priority | Number  | 检索优先级  | 否    |
+| status   | Boolean | 检索完成状态 | 否    |
 
 成功（200）
 
@@ -292,6 +320,8 @@ API设计文档
 
 
 
+
+
 ### Objective - 目标详细信息
 
 `GET`
@@ -299,6 +329,8 @@ API设计文档
 ```
 /objectives/:objectiveId
 ```
+
+**权限**：全体
 
 参数
 
@@ -322,6 +354,8 @@ API设计文档
 ```
 /objectives/:objectiveId/assignments
 ```
+
+权限：用户已登入
 
 参数
 
@@ -348,6 +382,8 @@ API设计文档
 /objectives/:objectiveId/assignments
 ```
 
+**权限**：用户已登入
+
 参数
 
 | 字段          | 类型     | 描述   | 是否必要 |
@@ -362,6 +398,12 @@ API设计文档
 | code      | Number    | 0    |
 | objective | Objective | 目标文档 |
 
+错误（401）
+
+| 字段          | 类型     | 描述     |
+| ----------- | ------ | ------ |
+| objectiveId | String | 加入权限不够 |
+
 
 
 ### Objective - 离开目标
@@ -371,6 +413,8 @@ API设计文档
 ```
 /objectives/:objectiveId/assignments
 ```
+
+权限：用户已登入
 
 参数
 
@@ -394,6 +438,8 @@ API设计文档
 ```
 /objectives/:objectiveId/comments
 ```
+
+权限：用户已登入
 
 参数
 
@@ -421,13 +467,14 @@ API设计文档
 /objectiveLists
 ```
 
+权限：用户已登入
+
 参数
 
 | 字段          | 类型     | 描述   | 是否必要 |
 | ----------- | ------ | ---- | ---- |
 | title       | String | 目标组名 | 是    |
 | description | String | 描述   | 否    |
-| scope       | String | 可见范围 | 是    |
 
 成功（201）
 
@@ -436,7 +483,11 @@ API设计文档
 | code          | Number        | 0      |
 | objectiveList | ObjectiveList | 目标分组文档 |
 
+请求失败（400）
 
+| 名称      | 类型    | 描述     |
+| ------- | ----- | ------ |
+| Require | Array | 必填字段缺失 |
 
 ### ObjectiveList - 删除分组
 
@@ -454,6 +505,12 @@ API设计文档
 
 成功（204）
 
+请求失败（401）
+
+| 字段              | 类型     | 描述     |
+| --------------- | ------ | ------ |
+| objectiveListId | String | 删除权限不够 |
+
 
 
 ### ObjectiveList - 修改分组
@@ -464,6 +521,8 @@ API设计文档
 /objectiveLists/:objectiveListId
 ```
 
+权限：用户已登入
+
 参数
 
 | 字段              | 类型     | 描述   | 是否必要 |
@@ -471,7 +530,6 @@ API设计文档
 | objectiveListId | String | 分组ID | 是    |
 | title           | String | 分组名  | 否    |
 | description     | String | 分组描述 | 否    |
-| scope           | String | 可见范围 | 否    |
 
 成功（200）
 
@@ -480,34 +538,17 @@ API设计文档
 | code          | Number        | 0          |
 | objectiveList | ObjectiveList | 被修改的目标分组文档 |
 
+请求失败（400）
 
+| 名称      | 类型    | 描述     |
+| ------- | ----- | ------ |
+| Require | Array | 必填字段缺失 |
 
-### ObjectiveList - 检索分组
+请求失败（401）
 
-`GET`
-
-```
-/objectiveLists
-```
-
-参数	
-
-| 字段    | 类型     | 描述    | 是否必要 |
-| ----- | ------ | ----- | ---- |
-| page  | Number | 分页码   | 否    |
-| limit | Number | 每页容量  | 是    |
-| sort  | String | 排序关键字 | 否    |
-| key   | String | 检索关键字 | 否    |
-| scope | String | 检索范围  | 是    |
-
-成功（200）
-
-| 字段            | 类型              | 描述     |
-| ------------- | --------------- | ------ |
-| code          | Number          | 0      |
-| objectiveList | ObjectiveList[] | 分组文档列表 |
-
-
+| 字段              | 类型     | 描述     |
+| --------------- | ------ | ------ |
+| objectiveListId | String | 修改权限不够 |
 
 ###  ObjectiveList - 分组详细信息
 
@@ -554,7 +595,11 @@ API设计文档
 | code          | Number        | 0    |
 | objectiveList | ObjectiveList | 分组文档 |
 
+请求失败（401）
 
+| 字段              | 类型     | 描述     |
+| --------------- | ------ | ------ |
+| objectiveListId | String | 添加权限不够 |
 
 ### ObjectiveList - 移除目标
 
@@ -578,3 +623,8 @@ API设计文档
 | code          | Number        | 0    |
 | objectiveList | ObjectiveList | 分组文档 |
 
+请求失败（401）
+
+| 字段              | 类型     | 描述     |
+| --------------- | ------ | ------ |
+| objectiveListId | String | 移除权限不够 |
