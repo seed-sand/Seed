@@ -50,7 +50,7 @@ API设计文档
 
 ### User - 修改密码
 
-`PATCH`
+`PUT`
 
 ```
 /users/password
@@ -106,7 +106,7 @@ API设计文档
 
 
 
-### User - 用户检索（废弃）
+### User - 用户检索
 
 > 应用Spring `Pageable`接口
 
@@ -290,9 +290,7 @@ API设计文档
 
 
 
-
-### Objective - 检索目标（废弃）
-
+### Objective - 检索目标
 
 `GET`
 
