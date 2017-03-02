@@ -60,7 +60,7 @@ public class Objective {
         return listId;
     }
 
-    public void setGroupId(ObjectId listId) {
+    public void setListId(ObjectId listId) {
         this.listId = listId;
     }
 
