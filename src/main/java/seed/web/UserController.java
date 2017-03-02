@@ -45,7 +45,7 @@ public class UserController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/profile")
-    User getUserProfile()
+//    @RequestMapping(method = RequestMethod.GET, value = "/profile")
+//    User getUserProfile()
 
 }
