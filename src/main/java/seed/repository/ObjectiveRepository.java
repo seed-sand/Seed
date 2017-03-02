@@ -16,11 +16,10 @@ import java.util.List;
 public interface ObjectiveRepository extends MongoRepository<Objective,ObjectId> {
     Objective findById(ObjectId id);
     List<Objective> findByUserId(ObjectId userId, Pageable pageable);
-    List<Objective> findByGroupId(ObjectId groupId, Pageable pageable);
+    List<Objective> findByListId(ObjectId listId, Pageable pageable);
     List<Objective> findByTitleIgnoreCase(String title, Pageable pageable);
     List<Objective> findByDeadline(DateTime deadline, Pageable pageable);
     List<Objective> findByPriority(int priority, Pageable pageable);
-    List<Objective> findByScope(boolean scope, Pageable pageable);
     List<Objective> findByStatus(boolean status, Pageable pageable);
 
 }

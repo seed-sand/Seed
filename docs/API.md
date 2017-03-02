@@ -189,33 +189,6 @@ API设计文档
 
 
 
-### User - 用户详细信息
-
-`GET`
-
-```
-/users/:userId
-```
-
-> 用户详细信息与用户个人信息的差别？？？---FROGGY
-
-**权限**：用户已登入
-
-参数
-
-| 字段     | 类型     | 描述   | 是否必要 |
-| ------ | ------ | ---- | ---- |
-| userId | String | 用户ID | 是    |
-
-成功（200）
-
-| 字段   | 类型     | 描述   |
-| ---- | ------ | ---- |
-| code | Number | 0    |
-| user | User   | 用户文档 |
-
-
-
 ## Objective API
 
 ### Objective - 创建目标
@@ -236,7 +209,6 @@ API设计文档
 | description | String   | 描述   | 否    |
 | deadline    | DateTime | 截止时间 | 否    |
 | priority    | Number   | 优先级  | 否    |
-| scope       | Boolean  | 范围   | 是    |
 
 成功（201）
 
@@ -300,8 +272,7 @@ API设计文档
 | description | String   | 描述   | 否    |
 | deadline    | DateTime | 截止时间 | 否    |
 | priority    | Number   | 优先级  | 否    |
-| scope       | Boolean  | 范围   | 否    |
-| status      | String   | 完成状态 | 否    |
+| status      | Boolean  | 完成状态 | 否    |
 
 成功（201）
 
@@ -319,7 +290,9 @@ API设计文档
 
 
 
+
 ### Objective - 检索目标（废弃）
+
 
 `GET`
 
@@ -331,13 +304,14 @@ API设计文档
 
 参数
 
-| 字段    | 类型     | 描述    | 是否必要 |
-| ----- | ------ | ----- | ---- |
-| page  | Number | 分页码   | 否    |
-| limit | Number | 每页容量  | 是    |
-| sort  | String | 排序关键字 | 否    |
-| key   | String | 检索关键字 | 否    |
-| scope | String | 检索范围  | 是    |
+| 字段       | 类型      | 描述     | 是否必要 |
+| -------- | ------- | ------ | ---- |
+| page     | Number  | 分页码    | 否    |
+| limit    | Number  | 每页容量   | 是    |
+| sort     | String  | 排序关键字  | 否    |
+| key      | String  | 检索关键字  | 否    |
+| priority | Number  | 检索优先级  | 否    |
+| status   | Boolean | 检索完成状态 | 否    |
 
 成功（200）
 
@@ -346,11 +320,7 @@ API设计文档
 | code       | Number      | 0      |
 | objectives | Objective[] | 目标文档列表 |
 
-请求失败（400）
 
-| 字段   | 类型     | 描述    |
-| ---- | ------ | ----- |
-| key  | String | 无相关内容 |
 
 
 
@@ -386,6 +356,8 @@ API设计文档
 ```
 /objectives/:objectiveId/assignments
 ```
+
+权限：用户已登入
 
 参数
 
@@ -505,7 +477,6 @@ API设计文档
 | ----------- | ------ | ---- | ---- |
 | title       | String | 目标组名 | 是    |
 | description | String | 描述   | 否    |
-| scope       | String | 可见范围 | 是    |
 
 成功（201）
 
@@ -561,7 +532,6 @@ API设计文档
 | objectiveListId | String | 分组ID | 是    |
 | title           | String | 分组名  | 否    |
 | description     | String | 分组描述 | 否    |
-| scope           | String | 可见范围 | 否    |
 
 成功（200）
 
@@ -581,33 +551,6 @@ API设计文档
 | 字段              | 类型     | 描述     |
 | --------------- | ------ | ------ |
 | objectiveListId | String | 修改权限不够 |
-
-### ObjectiveList - 检索分组（废弃）
-
-`GET`
-
-```
-/objectiveLists
-```
-
-参数
-
-| 字段    | 类型     | 描述    | 是否必要 |
-| ----- | ------ | ----- | ---- |
-| page  | Number | 分页码   | 否    |
-| limit | Number | 每页容量  | 是    |
-| sort  | String | 排序关键字 | 否    |
-| key   | String | 检索关键字 | 否    |
-| scope | String | 检索范围  | 是    |
-
-成功（200）
-
-| 字段            | 类型              | 描述     |
-| ------------- | --------------- | ------ |
-| code          | Number          | 0      |
-| objectiveList | ObjectiveList[] | 分组文档列表 |
-
-
 
 ###  ObjectiveList - 分组详细信息
 

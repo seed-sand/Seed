@@ -21,20 +21,18 @@ public class Objective {
     private ObjectId userId;
 
     @Indexed
-    private ObjectId groupId;
+    private ObjectId listId;
 
     private String title;
     private String description;
     private DateTime deadline;
     private int priority;
-    private String scope;
-    private String status;
+    private boolean status;
     private List<ObjectId> assignment;
     private List<ObjectId> comments;
 
-    public Objective(String title, String scope) {
+    public Objective(String title) {
         this.title = title;
-        this.scope = scope;
     }
 
     public ObjectId getId() {
@@ -53,12 +51,12 @@ public class Objective {
         this.userId = userId;
     }
 
-    public ObjectId getGroupId() {
-        return groupId;
+    public ObjectId getListIdId() {
+        return listId;
     }
 
-    public void setGroupId(ObjectId groupId) {
-        this.groupId = groupId;
+    public void setGroupId(ObjectId listId) {
+        this.listId = listId;
     }
 
     public String getTitle() {
@@ -93,19 +91,11 @@ public class Objective {
         this.priority = priority;
     }
 
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
-
-    public String getStatus() {
+    public boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(boolean status) {
         this.status = status;
     }
 

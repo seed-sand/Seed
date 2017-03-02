@@ -11,9 +11,8 @@ import java.util.List;
  * Created by Froggy
  * 2017-03-01.
  */
-public interface ObjectiveGroupRepository extends MongoRepository<Objective,ObjectId>{
+public interface ObjectiveListRepository extends MongoRepository<Objective,ObjectId>{
     Objective findById(ObjectId id);
     List<Objective> findByUserId(Objective userId, Pageable pageable);
     List<Objective> findByTitleIgnoreCase(String title, Pageable pageable);
-    List<Objective> findByScope(boolean scope, Pageable pageable);
 }
