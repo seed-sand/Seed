@@ -104,40 +104,6 @@ API设计文档
 | code | Number | 0          |
 | user | User   | 用户文档(个人信息) |
 
-
-
-### User - 用户检索
-
-> 应用Spring `Pageable`接口
-
-> 用户检索的用处是什么？--ASKED BY FROGGY
-
-`GET`
-
-```
-/users
-```
-
-**权限**：
-
-参数
-
-| 字段    | 类型     | 描述    | 是否必要 |
-| ----- | ------ | ----- | ---- |
-| page  | Number | 分页码   | 否    |
-| limit | Number | 每页容量  | 是    |
-| sort  | String | 排序关键字 | 否    |
-| key   | String | 关键字   | 否    |
-
-成功（200）
-
-| 字段    | 类型     | 描述     |
-| ----- | ------ | ------ |
-| code  | Number | 0      |
-| users | User[] | 用户文档列表 |
-
-
-
 ### User - 用户登出
 
 `GET`
@@ -398,14 +364,6 @@ API设计文档
 | code      | Number    | 0    |
 | objective | Objective | 目标文档 |
 
-错误（401）
-
-| 字段          | 类型     | 描述     |
-| ----------- | ------ | ------ |
-| objectiveId | String | 加入权限不够 |
-
-
-
 ### Objective - 离开目标
 
 `DELETE`
@@ -429,7 +387,11 @@ API设计文档
 | code      | Number    | 0    |
 | objective | Objective | 目标文档 |
 
+错误（401）
 
+| 字段          | 类型     | 描述     |
+| ----------- | ------ | ------ |
+| objectiveId | String | 离开权限不够 |
 
 ### Objective - 评论目标
 

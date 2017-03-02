@@ -31,8 +31,8 @@ public class UserController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    User createUser(@RequestBody User user) {
-        return userRepository.insert(user);
+    User createUser(@RequestBody User user) {   //@RequestBody 请求正文，用它来找到输入的user
+        return userRepository.insert(user);     //insert方法自动往数据库中加入数据，不需要去定义该方法
     }
 
     @RequestMapping(method = RequestMethod.PATCH, value = "/password")
