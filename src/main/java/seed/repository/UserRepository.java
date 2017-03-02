@@ -13,5 +13,6 @@ import java.util.List;
 
 public interface UserRepository extends MongoRepository<User, ObjectId> {
     User findById(ObjectId id);
+    User findByEmail(String email);
     List<User> findByUsername(String Username, Pageable pageable);
 }

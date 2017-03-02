@@ -20,13 +20,11 @@ public class ObjectiveList {
 
     private String title;
     private String description;
-    private String scope;
 
     private List<ObjectId> objectives;
 
     public ObjectiveList(String title, String scope) {
         this.title = title;
-        this.scope = scope;
     }
 
     public ObjectId getId() {
@@ -59,14 +57,6 @@ public class ObjectiveList {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
     }
 
     public List<ObjectId> getObjectives() {
