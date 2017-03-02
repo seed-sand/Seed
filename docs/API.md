@@ -50,7 +50,7 @@ API设计文档
 
 ### User - 修改密码
 
-`PUT`
+`PATCH`
 
 ```
 /users/password
@@ -106,7 +106,7 @@ API设计文档
 
 
 
-### User - 用户检索
+### User - 用户检索（废弃）
 
 > 应用Spring `Pageable`接口
 
@@ -319,7 +319,7 @@ API设计文档
 
 
 
-### Objective - 检索目标（暂时用不上）
+### Objective - 检索目标（废弃）
 
 `GET`
 
@@ -582,7 +582,7 @@ API设计文档
 | --------------- | ------ | ------ |
 | objectiveListId | String | 修改权限不够 |
 
-### ObjectiveList - 检索分组（暂时用不上）
+### ObjectiveList - 检索分组（废弃）
 
 `GET`
 
@@ -590,7 +590,7 @@ API设计文档
 /objectiveLists
 ```
 
-参数	
+参数
 
 | 字段    | 类型     | 描述    | 是否必要 |
 | ----- | ------ | ----- | ---- |
