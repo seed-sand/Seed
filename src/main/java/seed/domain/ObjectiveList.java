@@ -23,7 +23,7 @@ public class ObjectiveList {
 
     private List<ObjectId> objectives;
 
-    public ObjectiveList(String title, String scope) {
+    public ObjectiveList(String title) {
         this.title = title;
     }
 

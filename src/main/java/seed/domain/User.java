@@ -27,6 +27,8 @@ public class User {
 
     @NotBlank
     private String password;
+
+    @NotBlank
     private String username;
 
     @Indexed(unique = true)
