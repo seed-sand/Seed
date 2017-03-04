@@ -6,13 +6,14 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import seed.domain.ObjectiveList;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Froggy
  * 2017-03-01.
  */
 public interface ObjectiveListRepository extends MongoRepository<ObjectiveList,ObjectId>{
-    ObjectiveList findById(ObjectId id);
+    Optional<ObjectiveList> findById(ObjectId id);
     List<ObjectiveList> findByUserId(ObjectiveList userId, Pageable pageable);
     List<ObjectiveList> findByTitleIgnoreCase(String title, Pageable pageable);
 }

@@ -44,7 +44,7 @@ public class User {
 
     public User(String username, String identity, String password, boolean useWechat) {
         this.username = username;
-        this.password = password;
+        this.setPassword(password);
         if(useWechat) {
             this.openId = identity;
         } else {
@@ -52,7 +52,7 @@ public class User {
         }
     }
 
-    private static String encrypt(String algorithm, String clearText) {
+    public static String encrypt(String algorithm, String clearText) {
         try {
             MessageDigest pwd = MessageDigest.getInstance(algorithm);
             pwd.update(clearText.getBytes());
@@ -70,7 +70,7 @@ public class User {
         id = id;
     }
 
-    public void setPassword(String password) {
+    private void setPassword(String password) {
         this.password = encrypt("SHA1", password);
     }
 
