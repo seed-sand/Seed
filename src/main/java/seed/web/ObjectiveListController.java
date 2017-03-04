@@ -50,7 +50,7 @@ public class ObjectiveListController {
     }
 
     @RequestMapping(method = DELETE, value = "/{objectiveListId}")
-    ResponseEntity<?> delete(@PathVariable ObjectId objectiveListId, HttpSession httpSession) {
+    ResponseEntity<?> delete(@PathVariable ObjectId objectiveListId, HttpSession httpSession) throws Exception {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -73,7 +73,7 @@ public class ObjectiveListController {
     @RequestMapping(method = PATCH, value = "/{objectiveListId}")
     ResponseEntity<?> update(@PathVariable ObjectId objectiveListId,
                              @RequestBody ObjectiveList objectiveList,
-                             HttpSession httpSession) {
+                             HttpSession httpSession) throws Exception {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -102,7 +102,7 @@ public class ObjectiveListController {
     @RequestMapping(method = PUT, value = "/{objectiveListId}/objective")
     ResponseEntity<?> pushObjective(@PathVariable ObjectId objectiveListId,
                                     @RequestBody Objective objective,
-                                    HttpSession httpSession) {
+                                    HttpSession httpSession) throws Exception {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -125,7 +125,7 @@ public class ObjectiveListController {
     @RequestMapping(method = DELETE, value = "/{objectiveListId}/objective")
     ResponseEntity<?> popObjective(@PathVariable ObjectId objectiveListId,
                                    @RequestBody ObjectId objectiveId,
-                                   HttpSession httpSession) {
+                                   HttpSession httpSession) throws Exception {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
