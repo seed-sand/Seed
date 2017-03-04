@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import seed.domain.Objective;
 import seed.domain.ObjectiveList;
 import seed.exception.ResourceNotFoundException;
+import seed.exception.UnauthenticatedException;
 import seed.exception.UnauthorizedException;
 import seed.repository.ObjectiveListRepository;
 import seed.repository.UserRepository;
@@ -45,7 +46,7 @@ public class ObjectiveListController {
                     objectiveList.setUserId(userId);
                     return new ResponseEntity<>(objectiveListRepository.insert(objectiveList), HttpStatus.CREATED);
                 })
-                .orElseThrow(UnauthorizedException::new);
+                .orElseThrow(UnauthenticatedException::new);
     }
 
     @RequestMapping(method = DELETE, value = "/{objectiveListId}")
@@ -67,16 +68,16 @@ public class ObjectiveListController {
         return userRepository.findById(userId)
                 .map(user -> {
                     ObjectiveList objectiveList1 = objectiveListRepository.findById(objectiveListId)
-                            .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
-                            .orElseThrow(UnauthorizedException::new);
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
+                            "objective list"));
                     return Optional.of(objectiveList1)
+                            .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList2 -> {
                                 objectiveList.setId(objectiveListId);
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList), HttpStatus.OK);
                             })
-                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
-                                    "objective list"));
-                }).orElseThrow(UnauthorizedException::new);
+                            .orElseThrow(UnauthorizedException::new);
+                }).orElseThrow(UnauthenticatedException::new);
     }
 
     @RequestMapping(method = GET, value = "/{objectiveListId}")
@@ -95,19 +96,19 @@ public class ObjectiveListController {
         return userRepository.findById(userId)
                 .map(user -> {
                     ObjectiveList objectiveList = objectiveListRepository.findById(objectiveListId)
-                            .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
-                            .orElseThrow(UnauthorizedException::new);
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
+                                    "objective list"));
                     return Optional.of(objectiveList)
+                            .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList1 -> {
                                 List<ObjectId> objectives = objectiveList1.getObjectives();
                                 objectives.add(objective.getId());
                                 objectiveList1.setObjectives(objectives);
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
                             })
-                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
-                                    "objective list"));
+                            .orElseThrow(UnauthorizedException::new);
                 })
-                .orElseThrow(UnauthorizedException::new);
+                .orElseThrow(UnauthenticatedException::new);
     }
 
     @RequestMapping(method = DELETE, value = "/{objectiveListId}/objective")
@@ -118,9 +119,10 @@ public class ObjectiveListController {
         return userRepository.findById(userId)
                 .map(user -> {
                     ObjectiveList objectiveList = objectiveListRepository.findById(objectiveListId)
-                            .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
-                            .orElseThrow(UnauthorizedException::new);
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
+                                    "objective list"));
                     return Optional.of(objectiveList)
+                            .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList1 -> {
                                 List<ObjectId> objectives = objectiveList1.getObjectives();
                                 objectives = objectives.stream()
@@ -129,9 +131,8 @@ public class ObjectiveListController {
                                 objectiveList1.setObjectives(objectives);
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
                             })
-                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
-                                    "objective list"));
+                            .orElseThrow(UnauthorizedException::new);
                 })
-                .orElseThrow(UnauthorizedException::new);
+                .orElseThrow(UnauthenticatedException::new);
     }
 }

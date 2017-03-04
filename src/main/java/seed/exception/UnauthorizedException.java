@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * 2017-03-02.
  */
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
-public class UnauthorizedException extends RuntimeException{
-    public UnauthorizedException(){
+public class UnauthorizedException extends RuntimeException {
+    public UnauthorizedException() {
         super("You do not have enough authorization.");
     }
 }
