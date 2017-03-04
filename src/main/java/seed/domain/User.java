@@ -41,6 +41,7 @@ public class User {
     private String avatar;
     private List<ObjectId> ObjectiveCreated;
     private List<ObjectId> ObjectiveJoined;
+    private List<ObjectId> ObjectiveListCreated;
 
     public User(String username, String identity, String password, boolean useWechat) {
         this.username = username;
@@ -124,6 +125,14 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public List<ObjectId> getObjectiveListCreated() {
+        return ObjectiveListCreated;
+    }
+
+    public void setObjectiveListCreated(List<ObjectId> objectiveListCreated) {
+        ObjectiveListCreated = objectiveListCreated;
     }
 
     protected User() {
