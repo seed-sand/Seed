@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import seed.domain.AuthCert;
 import seed.domain.User;
 import seed.exception.IncorrectPasswordException;
+import seed.exception.UnauthorizedException;
 import seed.exception.UserNotFoundException;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
@@ -73,7 +74,7 @@ public class UserController {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                              .filter(user -> validateUser(userId))
-                             .orElseThrow(UserNotFoundException::new);
+                             .orElseThrow(UnauthorizedException::new);
     }
 
     @RequestMapping(method = GET, value = "/log-out")
