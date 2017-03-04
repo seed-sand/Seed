@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import seed.domain.AuthCert;
 import seed.domain.User;
 import seed.exception.IncorrectPasswordException;
+import seed.exception.ResourceNotFoundException;
 import seed.exception.UnauthorizedException;
-import seed.exception.UserNotFoundException;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
@@ -49,10 +49,10 @@ public class UserController {
         User user;
         if(authCert.useWechat) {
             user = this.userRepository.findByOpenId(authCert.openid)
-                    .orElseThrow(UserNotFoundException::new);
+                    .orElseThrow(() -> new ResourceNotFoundException(authCert.openid ,"user"));
         } else {
             user = this.userRepository.findByEmail(authCert.email)
-                    .orElseThrow(UserNotFoundException::new);
+                    .orElseThrow(() -> new ResourceNotFoundException(authCert.openid ,"user"));
         }
 
         System.out.println(user.passwordAuthenticate(authCert.password));
@@ -69,7 +69,7 @@ public class UserController {
 
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         User user = userRepository.findById(userId)
-                                  .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(() -> new ResourceNotFoundException(userId ,"user"));
         user = Optional.of(user).filter(user1 -> user1.passwordAuthenticate(oldPassword))
                                 .orElseThrow(IncorrectPasswordException::new);
         return userRepository.save(user);
