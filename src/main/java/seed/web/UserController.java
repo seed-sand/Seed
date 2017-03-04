@@ -46,10 +46,18 @@ public class UserController {
 
     @RequestMapping(method = POST, value = "log-in")
     User login(@RequestBody AuthCert authCert, HttpSession httpSession) {
-        validateUser(authCert.useWechat ? authCert.openid : authCert.email, authCert.useWechat);
-        User user = this.userRepository.findByEmail(authCert.useWechat ? authCert.openid : authCert.email)
-                                       .filter(user1 -> user1.passwordAuthenticate(authCert.password))
-                                       .orElseThrow(IncorrectPasswordException::new);
+        User user;
+        if(authCert.useWechat) {
+            user = this.userRepository.findByOpenId(authCert.openid)
+                    .orElseThrow(UserNotFoundException::new);
+        } else {
+            user = this.userRepository.findByEmail(authCert.email)
+                    .orElseThrow(UserNotFoundException::new);
+        }
+
+        System.out.println(user.passwordAuthenticate(authCert.password));
+        user = Optional.of(user).filter(user1 -> user1.passwordAuthenticate(authCert.password))
+                                .orElseThrow(IncorrectPasswordException::new);
         httpSession.setAttribute("userId", user.getId());
         return user;
     }
@@ -60,9 +68,7 @@ public class UserController {
                         HttpSession httpSession) {
 
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
-        validateUser(userId);
         User user = userRepository.findById(userId)
-                                  .filter(user1 -> validateUser(userId))
                                   .orElseThrow(UserNotFoundException::new);
         user = Optional.of(user).filter(user1 -> user1.passwordAuthenticate(oldPassword))
                                 .orElseThrow(IncorrectPasswordException::new);
@@ -73,7 +79,6 @@ public class UserController {
     User getProfile(HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
-                             .filter(user -> validateUser(userId))
                              .orElseThrow(UnauthorizedException::new);
     }
 
@@ -83,16 +88,5 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    private boolean validateUser(ObjectId id) {
-        return this.userRepository.findById(id).isPresent();
-    }
-
-    private boolean validateUser(String identity, boolean useWechat) {
-        if(useWechat) {
-            return this.userRepository.findByOpenId(identity).isPresent();
-        } else {
-            return this.userRepository.findByEmail(identity).isPresent();
-        }
-    }
 
 }
