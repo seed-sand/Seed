@@ -15,10 +15,8 @@ import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -44,7 +42,12 @@ public class ObjectiveListController {
         return userRepository.findById(userId)
                 .map(user -> {
                     objectiveList.setUserId(userId);
-                    return new ResponseEntity<>(objectiveListRepository.insert(objectiveList), HttpStatus.CREATED);
+                    List<ObjectId> objectIdLists = user.getObjectiveListCreated();
+                    ObjectiveList objectiveList1 = objectiveListRepository.insert(objectiveList);
+                    objectIdLists.add(objectiveList1.getId());
+                    user.setObjectiveListCreated(objectIdLists);
+                    userRepository.save(user);
+                    return new ResponseEntity<>(objectiveList1, HttpStatus.CREATED);
                 })
                 .orElseThrow(UnauthenticatedException::new);
     }
@@ -60,6 +63,12 @@ public class ObjectiveListController {
                     return Optional.of(objectiveList1)
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList -> {
+                                List<ObjectId> objectIdLists = user.getObjectiveListCreated();
+                                objectIdLists = objectIdLists.stream()
+                                        .filter(objectId -> objectId != objectiveListId)
+                                        .collect(Collectors.toList());
+                                user.setObjectiveListCreated(objectIdLists);
+                                userRepository.save(user);
                                 objectiveListRepository.delete(objectiveList);
                                 return ResponseEntity.noContent().build();
                             })

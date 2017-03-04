@@ -80,7 +80,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/user")
                 .content(this.json(user))
                 .contentType(contentType))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     @Test

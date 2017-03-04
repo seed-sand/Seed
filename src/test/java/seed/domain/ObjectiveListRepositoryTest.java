@@ -64,10 +64,10 @@ public class ObjectiveListRepositoryTest {
 
     @Test
     public void update() {
-        ObjectiveList objectiveList = objectiveListRepository.findById(id1);
+        ObjectiveList objectiveList = objectiveListRepository.findById(id1).get();
         objectiveList.setTitle("life");
         objectiveListRepository.save(objectiveList);
-        assertEquals("life", objectiveListRepository.findById(id1).getTitle());
+        assertEquals("life", objectiveListRepository.findById(id1).get().getTitle());
         objectiveListRepository.delete(id1);
         objectiveListRepository.delete(id2);
         objectiveListRepository.delete(id3);
