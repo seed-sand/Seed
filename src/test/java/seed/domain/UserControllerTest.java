@@ -21,6 +21,7 @@ import seed.repository.UserRepository;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -45,6 +46,8 @@ public class UserControllerTest {
     private HttpMessageConverter mappingJackson2HttpMessageConverter;
 
     private User user;
+
+    private HashMap<String, Object> sessionAttr;
 
     @Autowired
     private UserRepository userRepository;
@@ -71,6 +74,9 @@ public class UserControllerTest {
         this.userRepository.deleteAll();
 
         this.user = userRepository.insert(new User("Tom", "Tom@testUser.com", "123456", false));
+
+        sessionAttr = new HashMap<String, Object>();
+        sessionAttr.put("userId", user.getId());
     }
 
     @Test
@@ -101,6 +107,14 @@ public class UserControllerTest {
         mockMvc.perform(get("/user/profile")
                 .contentType(contentType))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void getProfileWithAfterLogin() throws Exception {
+        mockMvc.perform(get("/user/profile")
+                .sessionAttrs(sessionAttr)
+                .contentType(contentType))
+                .andExpect(status().isOk());
     }
 
 
