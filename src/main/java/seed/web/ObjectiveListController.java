@@ -50,14 +50,24 @@ public class ObjectiveListController {
     }
 
     @RequestMapping(method = DELETE, value = "/{objectiveListId}")
-    ResponseEntity<?> delete(@PathVariable ObjectId objectiveListId) {
-        return objectiveListRepository.findById(objectiveListId)
-                .map(objectiveList -> {
-                    objectiveListRepository.delete(objectiveList);
-                    return ResponseEntity.noContent().build();
+    ResponseEntity<?> delete(@PathVariable ObjectId objectiveListId, HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    ObjectiveList objectiveList1 = objectiveListRepository.findById(objectiveListId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
+                                    "objective list"));
+                    return Optional.of(objectiveList1)
+                            .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
+                            .map(objectiveList -> {
+                                objectiveListRepository.delete(objectiveList);
+                                return ResponseEntity.noContent().build();
+                            })
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
+                                    "objective list"));
                 })
-                .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
-                        "objective list"));
+                .orElseThrow(UnauthenticatedException::new);
+
     }
 
     @RequestMapping(method = PATCH, value = "/{objectiveListId}")
@@ -77,7 +87,8 @@ public class ObjectiveListController {
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList), HttpStatus.OK);
                             })
                             .orElseThrow(UnauthorizedException::new);
-                }).orElseThrow(UnauthenticatedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
     }
 
     @RequestMapping(method = GET, value = "/{objectiveListId}")
