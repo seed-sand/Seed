@@ -125,7 +125,7 @@ public class ObjectiveListController {
                                 List<ObjectId> objectives = objectiveList1.getObjectives();
                                 objectives = objectives.stream()
                                         .filter(objectId -> objectId != objectiveId)
-                                        .collect(Collectors.toList()))
+                                        .collect(Collectors.toList());
                                 objectiveList1.setObjectives(objectives);
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
                             })
