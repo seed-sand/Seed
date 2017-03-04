@@ -2,6 +2,7 @@ package seed.web;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,7 +12,6 @@ import seed.domain.User;
 import seed.exception.IncorrectPasswordException;
 import seed.exception.ResourceNotFoundException;
 import seed.exception.UnauthorizedException;
-import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
 
@@ -31,21 +31,19 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @RequestMapping("/user")
 public class UserController {
     private final UserRepository userRepository;
-    private final ObjectiveRepository objectiveRepository;
 
     @Autowired
-    UserController(UserRepository userRepository, ObjectiveRepository objectiveRepository) {
+    UserController(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.objectiveRepository = objectiveRepository;
     }
 
     @RequestMapping(method = POST)
-    User signup(@RequestBody User user, HttpSession httpSession) {
-        return userRepository.insert(user);
+    ResponseEntity<?> signup(@RequestBody User user, HttpSession httpSession) {
+        return new ResponseEntity<>(userRepository.insert(user), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = POST, value = "log-in")
-    User login(@RequestBody AuthCert authCert, HttpSession httpSession) {
+    ResponseEntity<?> login(@RequestBody AuthCert authCert, HttpSession httpSession) {
         User user;
         if(authCert.useWechat) {
             user = this.userRepository.findByOpenId(authCert.openid)
@@ -55,31 +53,33 @@ public class UserController {
                     .orElseThrow(() -> new ResourceNotFoundException(authCert.openid ,"user"));
         }
 
-        System.out.println(user.passwordAuthenticate(authCert.password));
-        user = Optional.of(user).filter(user1 -> user1.passwordAuthenticate(authCert.password))
-                                .orElseThrow(IncorrectPasswordException::new);
-        httpSession.setAttribute("userId", user.getId());
-        return user;
+        return Optional.of(user).filter(user1 -> user1.passwordAuthenticate(authCert.password))
+                .map(user1 -> {
+                    httpSession.setAttribute("userId", user.getId());
+                    return new ResponseEntity<>(user1, HttpStatus.OK);
+                })
+                .orElseThrow(IncorrectPasswordException::new);
     }
 
     @RequestMapping(method = PATCH, value = "/password")
-    User ChangePassword(@RequestBody String oldPassword,
+    ResponseEntity<?> ChangePassword(@RequestBody String oldPassword,
                         @RequestBody String newPassword,
                         HttpSession httpSession) {
 
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(userId ,"user"));
-        user = Optional.of(user).filter(user1 -> user1.passwordAuthenticate(oldPassword))
-                                .orElseThrow(IncorrectPasswordException::new);
-        return userRepository.save(user);
+        return Optional.of(user).filter(user1 -> user1.passwordAuthenticate(oldPassword))
+                .map(user1 -> new ResponseEntity<>(user, HttpStatus.OK))
+                .orElseThrow(IncorrectPasswordException::new);
     }
 
     @RequestMapping(method = GET, value = "/profile")
-    User getProfile(HttpSession httpSession) {
+    ResponseEntity<?> getProfile(HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
-                             .orElseThrow(UnauthorizedException::new);
+                .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
+                .orElseThrow(UnauthorizedException::new);
     }
 
     @RequestMapping(method = GET, value = "/log-out")

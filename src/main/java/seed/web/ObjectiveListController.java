@@ -14,8 +14,11 @@ import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
@@ -40,8 +43,7 @@ public class ObjectiveListController {
         return userRepository.findById(userId)
                 .map(user -> {
                     objectiveList.setUserId(userId);
-                    ObjectiveList objectiveList1 = objectiveListRepository.insert(objectiveList);
-                    return new ResponseEntity<>(objectiveList1, HttpStatus.CREATED);
+                    return new ResponseEntity<>(objectiveListRepository.insert(objectiveList), HttpStatus.CREATED);
                 })
                 .orElseThrow(UnauthorizedException::new);
     }
@@ -99,6 +101,31 @@ public class ObjectiveListController {
                             .map(objectiveList1 -> {
                                 List<ObjectId> objectives = objectiveList1.getObjectives();
                                 objectives.add(objective.getId());
+                                objectiveList1.setObjectives(objectives);
+                                return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
+                            })
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveListId,
+                                    "objective list"));
+                })
+                .orElseThrow(UnauthorizedException::new);
+    }
+
+    @RequestMapping(method = DELETE, value = "/{objectiveListId}/objective")
+    ResponseEntity<?> popObjective(@PathVariable ObjectId objectiveListId,
+                                   @RequestBody ObjectId objectiveId,
+                                   HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    ObjectiveList objectiveList = objectiveListRepository.findById(objectiveListId)
+                            .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
+                            .orElseThrow(UnauthorizedException::new);
+                    return Optional.of(objectiveList)
+                            .map(objectiveList1 -> {
+                                List<ObjectId> objectives = objectiveList1.getObjectives();
+                                objectives = objectives.stream()
+                                        .filter(objectId -> objectId != objectiveId)
+                                        .collect(Collectors.toList()))
                                 objectiveList1.setObjectives(objectives);
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
                             })
