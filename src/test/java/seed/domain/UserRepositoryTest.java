@@ -26,12 +26,8 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
     private User user1;
-    private User user2;
-    private User user3;
     private Pageable pageable;
     private ObjectId id1;
-    private ObjectId id2;
-    private ObjectId id3;
 
     @Before
     public void setUp(){
