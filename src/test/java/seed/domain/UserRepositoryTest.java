@@ -8,10 +8,8 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import seed.Application;
-import seed.repository.ObjectiveListRepository;
 import seed.repository.UserRepository;
 
 import static org.junit.Assert.*;
@@ -37,14 +35,11 @@ public class UserRepositoryTest {
 
     @Before
     public void setUp(){
+        userRepository.deleteAll();
         pageable = new PageRequest(0, 20);
-        user1 = new User("Alan","Alan","",true);
-        user1.setEmail("Alan@gmail.com");
-        user2 = new User();
-        user3 = new User();
+        user1 = new User("ab","bc","cd",false);
+//        user1.setEmail("d");
         id1 = userRepository.insert(user1).getId();
-        id2 = userRepository.insert(user2).getId();
-        id3 = userRepository.insert(user3).getId();
 
     }
 
@@ -54,34 +49,18 @@ public class UserRepositoryTest {
         assertNotNull(userRepository.findByEmail(user1.getEmail()));
         assertNotNull(userRepository.findByOpenId(user1.getOpenId()));
         assertNotNull(userRepository.findByUsername(user1.getUsername(),pageable));
-        userRepository.delete(id1);
-        userRepository.delete(id2);
-        userRepository.delete(id3);
-
-
-
+        userRepository.deleteAll();
     }
 
     @Test
     public void update() {
-        user1.setId(id2);
-        assertEquals(id2,userRepository.findById(user1.getId()));
         user1.setEmail("Aria@gmail.com");
         assertEquals("Aria@gmail.com", userRepository.findByEmail(user1.getEmail()));
         user1.setOpenId("Aria");
         assertEquals("Aria", userRepository.findByOpenId(user1.getOpenId()));
         user1.setUsername("Aria");
         assertEquals("Aria", userRepository.findByUsername(user1.getUsername(),pageable));
-        userRepository.delete(id1);
-        userRepository.delete(id2);
-        userRepository.delete(id3);
+        userRepository.deleteAll();
 
     }
-
-
-
-
-
-
-
 }
