@@ -1,4 +1,4 @@
-package seed.domain;
+package seed.controller;
 
 import org.junit.After;
 import org.junit.Before;
@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import seed.Application;
+import seed.domain.AuthCert;
+import seed.domain.User;
 import seed.repository.UserRepository;
 
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.util.HashMap;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -86,6 +89,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/user")
                 .content(this.json(user))
                 .contentType(contentType))
+                .andDo(print())
                 .andExpect(status().isCreated());
     }
 
@@ -99,21 +103,22 @@ public class UserControllerTest {
         mockMvc.perform(post("/user/log-in")
                 .content(this.json(authCert))
                 .contentType(contentType))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     public void getProfileWithoutLogin() throws Exception {
-        mockMvc.perform(get("/user/profile")
-                .contentType(contentType))
+        mockMvc.perform(get("/user/profile"))
+                .andDo(print())
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void getProfileWithAfterLogin() throws Exception {
         mockMvc.perform(get("/user/profile")
-                .sessionAttrs(sessionAttr)
-                .contentType(contentType))
+                .sessionAttrs(sessionAttr))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 

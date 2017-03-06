@@ -11,6 +11,7 @@ import seed.exception.ResourceNotFoundException;
 import seed.exception.UnauthenticatedException;
 import seed.exception.UnauthorizedException;
 import seed.repository.ObjectiveListRepository;
+import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
@@ -29,12 +30,14 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RequestMapping("/objectiveList")
 public class ObjectiveListController {
     private final ObjectiveListRepository objectiveListRepository;
+    private final ObjectiveRepository objectiveRepository;
     private final UserRepository userRepository;
 
     @Autowired
-    ObjectiveListController(ObjectiveListRepository objectiveListRepository, UserRepository userRepository) {
+    ObjectiveListController(ObjectiveListRepository objectiveListRepository, UserRepository userRepository, ObjectiveRepository objectiveRepository) {
         this.objectiveListRepository = objectiveListRepository;
         this.userRepository = userRepository;
+        this.objectiveRepository = objectiveRepository;
     }
 
     @RequestMapping(method = POST)
@@ -109,9 +112,21 @@ public class ObjectiveListController {
                         "objective list"));
     }
 
+    @RequestMapping(method = GET)
+    ResponseEntity<?> getObjectiveLists(HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    List<ObjectId> objectiveLists = Optional.ofNullable(user.getObjectiveListCreated())
+                            .orElse(new ArrayList<>());
+                    return new ResponseEntity<>(objectiveLists, HttpStatus.OK);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
     @RequestMapping(method = PATCH, value = "/{objectiveListId}/objective")
     ResponseEntity<?> pushObjective(@PathVariable ObjectId objectiveListId,
-                                    @RequestBody Objective objective,
+                                    @RequestBody ObjectId objectiveId,
                                     HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
@@ -123,7 +138,11 @@ public class ObjectiveListController {
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList1 -> {
                                 List<ObjectId> objectives = Optional.ofNullable(objectiveList1.getObjectives()).orElse(new ArrayList<>());
-                                objectives.add(objective.getId());
+                                Objective objective = objectiveRepository.findById(objectiveId)
+                                        .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                                objective.setListId(objectiveListId);
+                                objectives.add(objectiveRepository.save(objective).getId());
+                                objectives = objectives.stream().distinct().collect(Collectors.toList());
                                 objectiveList1.setObjectives(objectives);
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
                             })
@@ -146,6 +165,10 @@ public class ObjectiveListController {
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList1 -> {
                                 List<ObjectId> objectives = Optional.ofNullable(objectiveList1.getObjectives()).orElse(new ArrayList<>());
+                                Objective objective = objectiveRepository.findById(objectiveId)
+                                        .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                                objective.setListId(null);
+                                objectiveRepository.save(objective);
                                 objectives = objectives.stream()
                                         .filter(objectId -> objectId != objectiveId)
                                         .collect(Collectors.toList());

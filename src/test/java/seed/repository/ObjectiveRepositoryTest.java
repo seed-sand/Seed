@@ -1,4 +1,4 @@
-package seed.domain;
+package seed.repository;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.junit.After;
@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import seed.Application;
+import seed.domain.Objective;
 import seed.repository.ObjectiveListRepository;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;

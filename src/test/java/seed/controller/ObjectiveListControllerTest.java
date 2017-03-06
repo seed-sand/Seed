@@ -1,4 +1,4 @@
-package seed.domain;
+package seed.controller;
 
 import org.bson.types.ObjectId;
 import org.junit.After;
@@ -16,6 +16,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import seed.Application;
+import seed.domain.Objective;
+import seed.domain.ObjectiveList;
+import seed.domain.User;
 import seed.repository.ObjectiveListRepository;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
@@ -26,6 +29,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -103,10 +107,11 @@ public class ObjectiveListControllerTest {
         objectiveList.setId(null);
         objectiveList.setUserId(null);
         mockMvc.perform(post("/objectiveList")
-                        .sessionAttrs(sessionAttr)
-                        .content(this.json(objectiveList))
-                        .contentType(contentType))
-                        .andExpect(status().isCreated());
+                .sessionAttrs(sessionAttr)
+                .content(this.json(objectiveList))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -121,31 +126,41 @@ public class ObjectiveListControllerTest {
                 .sessionAttrs(sessionAttr)
                 .content(this.json(objectiveList))
                 .contentType(contentType))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     public void getProfile() throws Exception {
         mockMvc.perform(get("/objectiveList/" + objectiveList.getId())
-                .sessionAttrs(sessionAttr)
-                .contentType(contentType))
+                .sessionAttrs(sessionAttr))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     public void remove() throws Exception {
         mockMvc.perform(delete("/objectiveList/" + objectiveList.getId())
-                .sessionAttrs(sessionAttr)
-                .contentType(contentType))
+                .sessionAttrs(sessionAttr))
+                .andDo(print())
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void getObjectiveLists() throws Exception {
+        mockMvc.perform(get("/objectiveList")
+                .sessionAttrs(sessionAttr))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
     @Test
     public void pushObjective() throws Exception {
         mockMvc.perform(patch("/objectiveList/" + objectiveList.getId() + "/objective")
                 .sessionAttrs(sessionAttr)
-                .content(json(objective1))
+                .content(json(objective1.getId()))
                 .contentType(contentType))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -155,6 +170,7 @@ public class ObjectiveListControllerTest {
                 .sessionAttrs(sessionAttr)
                 .content(json(objective1.getId()))
                 .contentType(contentType))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 

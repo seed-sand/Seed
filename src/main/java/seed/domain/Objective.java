@@ -8,7 +8,6 @@ import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class Objective {
 
     private DateTime deadline;
     private int priority;
-    private boolean status;
+    private boolean status = true;
     private List<ObjectId> assignment;
     private List<ObjectId> comments;
 
