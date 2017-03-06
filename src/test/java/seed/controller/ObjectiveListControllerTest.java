@@ -158,7 +158,7 @@ public class ObjectiveListControllerTest {
     public void pushObjective() throws Exception {
         mockMvc.perform(patch("/objectiveList/" + objectiveList.getId() + "/objective")
                 .sessionAttrs(sessionAttr)
-                .content(json(objective1))
+                .content(json(objective1.getId()))
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isOk());

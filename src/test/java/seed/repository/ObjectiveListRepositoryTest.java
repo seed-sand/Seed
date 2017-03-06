@@ -44,6 +44,8 @@ public class ObjectiveListRepositoryTest {
         objectiveList2.setDescription("objective for health");
         objectiveList3.setDescription("another objective for tech");
         id1 = objectiveListRepository.insert(objectiveList1).getId();
+        objectiveListRepository.insert(objectiveList2);
+        objectiveListRepository.insert(objectiveList3);
     }
 
 
