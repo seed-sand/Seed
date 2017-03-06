@@ -6,6 +6,7 @@ import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -26,9 +27,11 @@ public class User {
     private ObjectId id;
 
     @NotBlank
+    @NotEmpty
     private String password;
 
     @NotBlank
+    @NotEmpty
     private String username;
 
     @Indexed(unique = true)
@@ -41,6 +44,7 @@ public class User {
     private String avatar;
     private List<ObjectId> ObjectiveCreated;
     private List<ObjectId> ObjectiveJoined;
+    private List<ObjectId> ObjectiveListCreated = null;
 
     public User(String username, String identity, String password, boolean useWechat) {
         this.username = username;
@@ -124,6 +128,14 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public List<ObjectId> getObjectiveListCreated() {
+        return ObjectiveListCreated;
+    }
+
+    public void setObjectiveListCreated(List<ObjectId> objectiveListCreated) {
+        ObjectiveListCreated = objectiveListCreated;
     }
 
     protected User() {

@@ -15,10 +15,9 @@ import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -44,13 +43,18 @@ public class ObjectiveListController {
         return userRepository.findById(userId)
                 .map(user -> {
                     objectiveList.setUserId(userId);
-                    return new ResponseEntity<>(objectiveListRepository.insert(objectiveList), HttpStatus.CREATED);
+                    List<ObjectId> objectIdLists = Optional.ofNullable(user.getObjectiveListCreated()).orElse(new ArrayList<>());
+                    ObjectiveList objectiveList1 = objectiveListRepository.insert(objectiveList);
+                    objectIdLists.add(objectiveList1.getId());
+                    user.setObjectiveListCreated(objectIdLists);
+                    userRepository.save(user);
+                    return new ResponseEntity<>(objectiveList1, HttpStatus.CREATED);
                 })
                 .orElseThrow(UnauthenticatedException::new);
     }
 
     @RequestMapping(method = DELETE, value = "/{objectiveListId}")
-    ResponseEntity<?> delete(@PathVariable ObjectId objectiveListId, HttpSession httpSession) throws Exception {
+    ResponseEntity<?> delete(@PathVariable ObjectId objectiveListId, HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -60,6 +64,12 @@ public class ObjectiveListController {
                     return Optional.of(objectiveList1)
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList -> {
+                                List<ObjectId> objectIdLists = Optional.ofNullable(user.getObjectiveListCreated()).orElse(new ArrayList<>());
+                                objectIdLists = objectIdLists.stream()
+                                        .filter(objectId -> objectId != objectiveListId)
+                                        .collect(Collectors.toList());
+                                user.setObjectiveListCreated(objectIdLists);
+                                userRepository.save(user);
                                 objectiveListRepository.delete(objectiveList);
                                 return ResponseEntity.noContent().build();
                             })
@@ -70,10 +80,10 @@ public class ObjectiveListController {
 
     }
 
-    @RequestMapping(method = PATCH, value = "/{objectiveListId}")
+    @RequestMapping(method = PUT, value = "/{objectiveListId}")
     ResponseEntity<?> update(@PathVariable ObjectId objectiveListId,
                              @RequestBody ObjectiveList objectiveList,
-                             HttpSession httpSession) throws Exception {
+                             HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -99,10 +109,10 @@ public class ObjectiveListController {
                         "objective list"));
     }
 
-    @RequestMapping(method = PUT, value = "/{objectiveListId}/objective")
+    @RequestMapping(method = PATCH, value = "/{objectiveListId}/objective")
     ResponseEntity<?> pushObjective(@PathVariable ObjectId objectiveListId,
                                     @RequestBody Objective objective,
-                                    HttpSession httpSession) throws Exception {
+                                    HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -112,7 +122,7 @@ public class ObjectiveListController {
                     return Optional.of(objectiveList)
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList1 -> {
-                                List<ObjectId> objectives = objectiveList1.getObjectives();
+                                List<ObjectId> objectives = Optional.ofNullable(objectiveList1.getObjectives()).orElse(new ArrayList<>());
                                 objectives.add(objective.getId());
                                 objectiveList1.setObjectives(objectives);
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
@@ -125,7 +135,7 @@ public class ObjectiveListController {
     @RequestMapping(method = DELETE, value = "/{objectiveListId}/objective")
     ResponseEntity<?> popObjective(@PathVariable ObjectId objectiveListId,
                                    @RequestBody ObjectId objectiveId,
-                                   HttpSession httpSession) throws Exception {
+                                   HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -135,7 +145,7 @@ public class ObjectiveListController {
                     return Optional.of(objectiveList)
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList1 -> {
-                                List<ObjectId> objectives = objectiveList1.getObjectives();
+                                List<ObjectId> objectives = Optional.ofNullable(objectiveList1.getObjectives()).orElse(new ArrayList<>());
                                 objectives = objectives.stream()
                                         .filter(objectId -> objectId != objectiveId)
                                         .collect(Collectors.toList());
