@@ -15,6 +15,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import static seed.util.Encryption.encrypt;
+
 /**
  * Created by Macsnow on 2017/3/1.
  */
@@ -53,16 +55,6 @@ public class User {
             this.openId = identity;
         } else {
             this.email = identity;
-        }
-    }
-
-    public static String encrypt(String algorithm, String clearText) {
-        try {
-            MessageDigest pwd = MessageDigest.getInstance(algorithm);
-            pwd.update(clearText.getBytes());
-            return HexBin.encode(pwd.digest());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("No Such Algorithm: " + algorithm);
         }
     }
 

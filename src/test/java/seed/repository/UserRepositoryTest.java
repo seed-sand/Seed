@@ -1,4 +1,4 @@
-package seed.domain;
+package seed.repository;
 import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import seed.Application;
+import seed.domain.User;
 import seed.repository.UserRepository;
 
 import static org.junit.Assert.*;

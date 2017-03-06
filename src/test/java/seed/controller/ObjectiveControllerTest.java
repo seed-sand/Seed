@@ -1,4 +1,4 @@
-package seed.domain;
+package seed.controller;
 
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -17,6 +17,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import seed.Application;
+import seed.domain.Objective;
+import seed.domain.User;
 import seed.repository.ObjectiveListRepository;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
@@ -83,8 +85,12 @@ public class ObjectiveControllerTest {
 
         this.user = userRepository.insert(new User("Tom", "Tom@testUser.com", "123456", false));
 
-        objective = new Objective("test");
+        objective = new Objective("tech");
         objective.setUserId(user.getId());
+        objective.setDescription("objectives for tech");
+        objective.setDeadline(new DateTime(2019, 2, 1, 8, 2, 0));
+        objective.setPriority(3);
+        objective.setStatus(true);
         this.objective = objectiveRepository.insert(objective);
 
         //维持登录态
@@ -100,14 +106,14 @@ public class ObjectiveControllerTest {
                 .sessionAttrs(sessionAttr)
                 .content(this.json(objective))
                 .contentType(contentType))
+                .andDo(print())
                 .andExpect(status().isCreated());
     }
 
     @Test
     public void remove() throws Exception {
         mockMvc.perform(delete("/objective/" + objective.getId())
-                .sessionAttrs(sessionAttr)
-                .contentType(contentType))
+                .sessionAttrs(sessionAttr))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
@@ -131,8 +137,7 @@ public class ObjectiveControllerTest {
     @Test
     public void getProfile() throws Exception {
         mockMvc.perform(get("/objective/" + objective.getId())
-                .sessionAttrs(sessionAttr)
-                .contentType(contentType))
+                .sessionAttrs(sessionAttr))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -141,8 +146,8 @@ public class ObjectiveControllerTest {
     @Test
     public void share() throws Exception {
         mockMvc.perform(get("/objective/" + objective.getId() +"/assignment")
-                .sessionAttrs(sessionAttr)
-                .contentType(contentType))
+                .sessionAttrs(sessionAttr))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -152,6 +157,7 @@ public class ObjectiveControllerTest {
                 .sessionAttrs(sessionAttr)
                 .content(json(objective))
                 .contentType(contentType))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 
@@ -161,7 +167,36 @@ public class ObjectiveControllerTest {
                 .sessionAttrs(sessionAttr)
                 .content(json(objective.getId()))
                 .contentType(contentType))
+                .andDo(print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void search() throws Exception {
+        mockMvc.perform(get("/objective/search")
+                .sessionAttrs(sessionAttr)
+                .param("page", "0")
+                .param("size", "20")
+                .param("sort", "ASC")
+                .param("key", "title")
+                .param("value", "tech"))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    public void invalidSearch() throws Exception {
+        mockMvc.perform(get("/objective/search")
+                .sessionAttrs(sessionAttr)
+                .param("page", "0")
+                .param("size", "20")
+                .param("sort", "ASC")
+                .param("key", "Seeeeeeed")
+                .param("value", "deeeeeees"))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
     }
 
     protected String json(Object o) throws IOException {

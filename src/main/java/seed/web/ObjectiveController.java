@@ -21,10 +21,10 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static seed.util.Encryption.encrypt;
 
 /**
  * Created by Froggy
@@ -51,7 +51,7 @@ public class ObjectiveController {
                     objective.setUserId(userId);
                     Objective objective1 = objectiveRepository.insert(objective);
                     List<ObjectId> objectiveCreated = Optional.ofNullable(user.getObjectiveCreated()).orElse(new ArrayList<>());
-                   objectiveCreated.add(objective.getId());
+                    objectiveCreated.add(objective.getId());
                     user.setObjectiveCreated(objectiveCreated);
                     userRepository.save(user);
                     return new ResponseEntity<>(objective1, HttpStatus.CREATED);
@@ -71,7 +71,7 @@ public class ObjectiveController {
                             .map(objective -> {
                                 objectiveRepository.delete(objective);
                                 List<ObjectId> objectiveCreated = Optional.ofNullable(user.getObjectiveCreated()).orElse(new ArrayList<>());
-                                objectiveCreated.stream()
+                                objectiveCreated = objectiveCreated.stream()
                                         .filter(userId1 -> userId1 != userId).collect(Collectors.toList());
                                 user.setObjectiveCreated(objectiveCreated);
                                 userRepository.save(user);
@@ -82,7 +82,7 @@ public class ObjectiveController {
     }
 
     @RequestMapping(method = PUT, value = "/{objectiveId}")
-    ResponseEntity<?> modify(@PathVariable ObjectId objectiveId,
+    ResponseEntity<?> update(@PathVariable ObjectId objectiveId,
                              @RequestBody Objective objective,
                              HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
@@ -163,10 +163,13 @@ public class ObjectiveController {
                 .orElseThrow(UnauthenticatedException::new);
     }
 
-    //我不知道这个方法写的对不对@Michale  --Froggy
     @RequestMapping(method = GET, value = "/{objectiveId}/assignment")
     ResponseEntity<?> share(@PathVariable ObjectId objectiveId){
-        return objectiveRepository.findById(objectiveId).map(objective -> new ResponseEntity<>(objective, HttpStatus.OK))
+        return objectiveRepository.findById(objectiveId)
+                .map(objective -> {
+                    String encryptedObjectiveId = encrypt("SHA", objectiveId.toHexString());
+                    return new ResponseEntity<>(encryptedObjectiveId, HttpStatus.OK);
+                })
                 .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objectiveId"));
     }
 
@@ -179,14 +182,14 @@ public class ObjectiveController {
                     .map(objective0 -> {
                         List<ObjectId> participant = Optional.ofNullable(objective0.getAssignment()).orElse(new ArrayList<>());
                         participant.add(userId);
-                        participant.stream().distinct().collect(Collectors.toList());
+                        participant = participant.stream().distinct().collect(Collectors.toList());
                         objective0.setAssignment(participant);
                         return objective0;
                     }).orElseThrow(() -> new ResourceNotFoundException(objectiveId,"objectiveId"));
             //将objectiveId 放到user下
             List<ObjectId> objectiveJoined = Optional.ofNullable(user.getObjectiveJoined()).orElse(new ArrayList<>());
             objectiveJoined.add(objectiveId);
-            objectiveJoined.stream().distinct().collect(Collectors.toList());
+            objectiveJoined = objectiveJoined.stream().distinct().collect(Collectors.toList());
             user.setObjectiveJoined(objectiveJoined);
             userRepository.save(user);
             return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);
@@ -200,13 +203,13 @@ public class ObjectiveController {
             //将objective下的userId移除
             Objective objective = objectiveRepository.findById(objectiveId).map(objective1 -> {
                 List<ObjectId> participant = Optional.ofNullable(objective1.getAssignment()).orElse(new ArrayList<>());
-                participant.stream().filter(id -> id != userId).collect(Collectors.toList());
+                participant = participant.stream().filter(id -> id != userId).collect(Collectors.toList());
                 objective1.setAssignment(participant);
                 return objective1;
             }).orElseThrow(() -> new ResourceNotFoundException(objectiveId,"objectiveId"));
             //将user下的objectiveId移除
             List<ObjectId> objectiveJoined = Optional.ofNullable(user.getObjectiveJoined()).orElse(new ArrayList<>());
-            objectiveJoined.stream().filter(id -> id != objectiveId).collect(Collectors.toList());
+            objectiveJoined = objectiveJoined.stream().filter(id -> id != objectiveId).collect(Collectors.toList());
             user.setObjectiveJoined(objectiveJoined);
             userRepository.save(user);
             return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);

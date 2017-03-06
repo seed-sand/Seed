@@ -1,6 +1,7 @@
-package seed.domain;
+package seed.repository;
 
 import org.bson.types.ObjectId;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import seed.Application;
+import seed.domain.ObjectiveList;
 import seed.repository.ObjectiveListRepository;
 
 import static org.junit.Assert.*;
@@ -32,9 +34,6 @@ public class ObjectiveListRepositoryTest {
     private ObjectiveList objectiveList3;
     private Pageable pageable;
     private ObjectId id1;
-    private ObjectId id2;
-    private ObjectId id3;
-
     @Before
     public void setUp() {
         pageable = new PageRequest(0, 20);
@@ -45,8 +44,6 @@ public class ObjectiveListRepositoryTest {
         objectiveList2.setDescription("objective for health");
         objectiveList3.setDescription("another objective for tech");
         id1 = objectiveListRepository.insert(objectiveList1).getId();
-        id2 = objectiveListRepository.insert(objectiveList2).getId();
-        id3 = objectiveListRepository.insert(objectiveList3).getId();
     }
 
 
@@ -57,9 +54,6 @@ public class ObjectiveListRepositoryTest {
         assertTrue(objectiveListRepository.findByTitleIgnoreCase("tech", pageable).size() > 1);
         assertFalse(objectiveListRepository.findByTitleIgnoreCase("tech", pageable).get(0).getId() ==
                       objectiveListRepository.findByTitleIgnoreCase("tech", pageable).get(1).getId());
-        objectiveListRepository.delete(id1);
-        objectiveListRepository.delete(id2);
-        objectiveListRepository.delete(id3);
     }
 
     @Test
@@ -68,9 +62,11 @@ public class ObjectiveListRepositoryTest {
         objectiveList.setTitle("life");
         objectiveListRepository.save(objectiveList);
         assertEquals("life", objectiveListRepository.findById(id1).get().getTitle());
-        objectiveListRepository.delete(id1);
-        objectiveListRepository.delete(id2);
-        objectiveListRepository.delete(id3);
+    }
+
+    @After
+    public void tearDown() {
+        objectiveListRepository.deleteAll();
     }
 
 
