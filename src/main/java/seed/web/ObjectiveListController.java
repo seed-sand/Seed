@@ -15,6 +15,7 @@ import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class ObjectiveListController {
         return userRepository.findById(userId)
                 .map(user -> {
                     objectiveList.setUserId(userId);
-                    List<ObjectId> objectIdLists = user.getObjectiveListCreated();
+                    List<ObjectId> objectIdLists = Optional.ofNullable(user.getObjectiveListCreated()).orElse(new ArrayList<>());
                     ObjectiveList objectiveList1 = objectiveListRepository.insert(objectiveList);
                     objectIdLists.add(objectiveList1.getId());
                     user.setObjectiveListCreated(objectIdLists);
@@ -63,7 +64,7 @@ public class ObjectiveListController {
                     return Optional.of(objectiveList1)
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList -> {
-                                List<ObjectId> objectIdLists = user.getObjectiveListCreated();
+                                List<ObjectId> objectIdLists = Optional.ofNullable(user.getObjectiveListCreated()).orElse(new ArrayList<>());
                                 objectIdLists = objectIdLists.stream()
                                         .filter(objectId -> objectId != objectiveListId)
                                         .collect(Collectors.toList());
@@ -121,7 +122,7 @@ public class ObjectiveListController {
                     return Optional.of(objectiveList)
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList1 -> {
-                                List<ObjectId> objectives = objectiveList1.getObjectives();
+                                List<ObjectId> objectives = Optional.ofNullable(objectiveList1.getObjectives()).orElse(new ArrayList<>());
                                 objectives.add(objective.getId());
                                 objectiveList1.setObjectives(objectives);
                                 return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
@@ -144,7 +145,7 @@ public class ObjectiveListController {
                     return Optional.of(objectiveList)
                             .filter(objectiveList2 -> objectiveList2.getUserId().equals(userId))
                             .map(objectiveList1 -> {
-                                List<ObjectId> objectives = objectiveList1.getObjectives();
+                                List<ObjectId> objectives = Optional.ofNullable(objectiveList1.getObjectives()).orElse(new ArrayList<>());
                                 objectives = objectives.stream()
                                         .filter(objectId -> objectId != objectiveId)
                                         .collect(Collectors.toList());
