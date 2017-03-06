@@ -1,29 +1,23 @@
 package seed.web;
 
 import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import seed.domain.Objective;
-import seed.domain.User;
 import seed.exception.ResourceNotFoundException;
 import seed.exception.UnauthorizedException;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.PATCH;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 /**
  * Created by Froggy
@@ -60,6 +54,28 @@ public class ObjectiveController {
                 .orElseThrow(UnauthorizedException::new);
     }
 
+    @RequestMapping(method = DELETE, value = "/{ObjectiveId}")
+    ResponseEntity<?> delete(@PathVariable ObjectId id,HttpSession httpSession){
+        ObjectId userId = (ObjectId)httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user ->{
+                    Objective objective1 = objectiveRepository.findById(id)
+                            .orElseThrow(() -> new ResourceNotFoundException(id,"objectiveId"));
+                    return Optional.of(objective1)
+                            .filter(objective2 -> objective2.getUserId().equals(userId))
+                            .map(objective -> {
+                                objectiveRepository.delete(objective);
+                                List<ObjectId> objectiveCreated = user.getObjectiveCreated();
+                                objectiveCreated.stream()
+                                        .filter(userId1 -> userId1 != userId).collect(Collectors.toList());
+                                user.setObjectiveCreated(objectiveCreated);
+                                userRepository.save(user);
+                                //返回一个没有正文的响应
+                                return ResponseEntity.noContent().build();
+                            }).orElseThrow(UnauthorizedException::new);
+                }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
+    }
+
     @RequestMapping(method = PATCH, value = "/{ObjectiveId}")
     ResponseEntity<?> modify(@PathVariable ObjectId id,
                              @RequestBody Objective objective,
@@ -87,72 +103,61 @@ public class ObjectiveController {
                 }).orElseThrow(() -> new ResourceNotFoundException(userId, "userId"));
     }
 
-    @RequestMapping(method = DELETE, value = "/{ObjectiveId}")
-    ResponseEntity<?> delete(@PathVariable ObjectId id,HttpSession httpSession){
-        ObjectId userId = (ObjectId)httpSession.getAttribute("userId");
-        return userRepository.findById(userId)
-                .map(user ->{
-                    Objective objective1 = objectiveRepository.findById(id)
-                            .orElseThrow(() -> new ResourceNotFoundException(id,"objectiveId"));
-                    return Optional.of(objective1)
-                            .filter(objective2 -> objective2.getUserId().equals(userId))
-                            .map(objective -> {
-                                objectiveRepository.delete(objective);
-                                List<ObjectId> objectiveCreated = user.getObjectiveCreated();
-                                objectiveCreated.stream()
-                                        .filter(userId1 -> userId1 != userId).collect(Collectors.toList());
-                                user.setObjectiveCreated(objectiveCreated);
-                                userRepository.save(user);
-                                //返回一个没有正文的响应
-                                return ResponseEntity.noContent().build();
-                            }).orElseThrow(UnauthorizedException::new);
-                }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
+    @RequestMapping(method = GET, value = "/{ObjectiveId}")
+    ResponseEntity<?> getProfile(@PathVariable ObjectId objectiveId){
+        return objectiveRepository.findById(objectiveId).map(objective -> new ResponseEntity<>(objective, HttpStatus.OK))
+                .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objectiveId"));
     }
 
-    //三个get还没写
+    //One GET method SEARCHING remains
 
-    //Hi,Michale.You need to complete this method by encryption
+    //我不知道这个方法写的对不对@Michale  --Froggy
+    @RequestMapping(method = GET, value = "/{ObjectiveId}/assignment")
+    ResponseEntity<?> share(@PathVariable ObjectId objectiveId){
+        return objectiveRepository.findById(objectiveId).map(objective -> new ResponseEntity<>(objective, HttpStatus.OK))
+                .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objectiveId"));
+    }
+
     @RequestMapping(method = PATCH, value = "/{ObjectiveId}/assignment")
-    //这里objectiveId是被分享目标ID，userId是想加入该目标用户的ID
-    ResponseEntity<?> join(@PathVariable ObjectId objectiveId, HttpSession httpSession){
+    ResponseEntity<?> join (@PathVariable ObjectId objectiveId,HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
-        return objectiveRepository.findById(objectiveId)
-                .map(objective -> {
-                    List<ObjectId> participant = objective.getAssignment();
-                    participant.add(userId);
-                    //去重操作
-                    participant.stream().distinct().collect(Collectors.toList());
-                    objective.setAssignment(participant);
-                    User user = userRepository.findById(userId)
-                            .map(user0 -> {
-                                List<ObjectId> objective1 = user0.getObjectiveJoined();
-                                objective1.add(objectiveId);
-                                objective1.stream().distinct().collect(Collectors.toList());
-                                user0.setObjectiveCreated(objective1);
-                                return  user0;
-                            }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
-                    userRepository.save(user);
-                    return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);
-                }).orElseThrow(() -> new ResourceNotFoundException(objectiveId,"objectiveId"));
+        return userRepository.findById(userId).map(user -> {
+            //将userId放到objective下
+            Objective objective = objectiveRepository.findById(objectiveId)
+                    .map(objective0 -> {
+                        List<ObjectId> participant = objective0.getAssignment();
+                        participant.add(userId);
+                        participant.stream().distinct().collect(Collectors.toList());
+                        objective0.setAssignment(participant);
+                        return objective0;
+                    }).orElseThrow(() -> new ResourceNotFoundException(objectiveId,"objectiveId"));
+            //将objectiveId 放到user下
+            List<ObjectId> objectiveJoined = user.getObjectiveJoined();
+            objectiveJoined.add(objectiveId);
+            objectiveJoined.stream().distinct().collect(Collectors.toList());
+            user.setObjectiveJoined(objectiveJoined);
+            userRepository.save(user);
+            return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);
+        }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
     }
 
-    @RequestMapping(method = DELETE, value = "/{ObjectiveId}/assignment")
-    ResponseEntity<?> leave(@PathVariable ObjectId objectiveId,HttpSession httpSession){
+    @RequestMapping(method = DELETE,value = "/{ObjectiveId}/assignment")
+    ResponseEntity<?> leave (@PathVariable ObjectId objectiveId, HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
-        return objectiveRepository.findById(objectiveId)
-                .map(objective -> {
-                    List<ObjectId> participant = objective.getAssignment()
-                    .stream().filter(participantId -> participantId != userId).collect(Collectors.toList());
-                    objective.setAssignment(participant);
-                    User user = userRepository.findById(userId)
-                            .map(user1 -> {
-                                List<ObjectId> objectiveJoined1 = objective.getAssignment()
-                                        .stream().filter(joinedId -> joinedId != objectiveId).collect(Collectors.toList());
-                                user1.setObjectiveJoined(objectiveJoined1);
-                                return user1;
-                            }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
-                    userRepository.save(user);
-                    return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);
-                }).orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objectiveId"));
+        return userRepository.findById(userId).map(user -> {
+            //将objective下的userId移除
+            Objective objective = objectiveRepository.findById(objectiveId).map(objective1 -> {
+                List<ObjectId> participant = objective1.getAssignment();
+                participant.stream().filter(id -> id != userId).collect(Collectors.toList());
+                objective1.setAssignment(participant);
+                return objective1;
+            }).orElseThrow(() -> new ResourceNotFoundException(objectiveId,"objectiveId"));
+            //将user下的objectiveId移除
+            List<ObjectId> objectiveJoined = user.getObjectiveJoined();
+            objectiveJoined.stream().filter(id -> id != objectiveId).collect(Collectors.toList());
+            user.setObjectiveJoined(objectiveJoined);
+            userRepository.save(user);
+            return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);
+        }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
     }
 }
