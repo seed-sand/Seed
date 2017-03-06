@@ -9,7 +9,7 @@ import seed.domain.Objective;
  * 2017-03-01.
  */
 
-@ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class RequiredFieldMissingException extends RuntimeException {
     public RequiredFieldMissingException(String field){
         super("Required Field" + field + "missing");

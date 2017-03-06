@@ -1,20 +1,27 @@
 package seed.web;
 
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import seed.domain.Objective;
+import seed.exception.InvalidFieldException;
 import seed.exception.ResourceNotFoundException;
+import seed.exception.UnauthenticatedException;
 import seed.exception.UnauthorizedException;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -27,13 +34,11 @@ import static org.springframework.web.bind.annotation.RequestMethod.*;
 @RestController
 @RequestMapping("/objective")
 public class ObjectiveController {
-    private final MongoTemplate mongoTemplate;
     private final UserRepository userRepository;
     private final ObjectiveRepository objectiveRepository;
 
     @Autowired
-    public ObjectiveController(MongoTemplate mongoTemplate, UserRepository userRepository, ObjectiveRepository objectiveRepository){
-        this.mongoTemplate = mongoTemplate;
+    public ObjectiveController(UserRepository userRepository, ObjectiveRepository objectiveRepository){
         this.userRepository = userRepository;
         this.objectiveRepository = objectiveRepository;
     }
@@ -109,7 +114,54 @@ public class ObjectiveController {
                 .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objectiveId"));
     }
 
-    //One GET method SEARCHING remains
+    @RequestMapping(method = GET)
+    ResponseEntity<?> getObjectives(HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    List<ObjectId> objectives = Optional.ofNullable(user.getObjectiveListCreated())
+                            .orElse(new ArrayList<>());
+                    return new ResponseEntity<>(objectives, HttpStatus.OK);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
+    @RequestMapping(method = GET, value = "/search")
+    ResponseEntity<?> search(@RequestParam(value = "page", defaultValue = "0") int page,
+                             @RequestParam(value = "size", defaultValue = "7") int size,
+                             @RequestParam(value = "sort", defaultValue = "ASC") Sort.Direction direction ,
+                             @RequestParam(value = "key", defaultValue = "title") String key,
+                             @RequestParam(value = "value") String value,
+                             HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Sort sort = new Sort(direction, key);
+                    Pageable pageable = new PageRequest(page, size, sort);
+                    List<Objective> objectives;
+                    switch (key) {
+                        case "title":
+                            objectives = objectiveRepository.findByTitleIgnoreCase(value, pageable);
+                            break;
+                        case "deadLine":
+                            objectives = objectiveRepository.findByDeadline(DateTime.parse(value), pageable);
+                            break;
+                        case "priority":
+                            objectives = objectiveRepository.findByPriority(Integer.parseInt(value), pageable);
+                            break;
+                        case "status":
+                            objectives = objectiveRepository.findByStatus(Boolean.parseBoolean(value), pageable);
+                            break;
+                        default:
+                            throw new InvalidFieldException(key);
+                    }
+                    objectives = objectives.stream()
+                            .filter(objective -> objective.getUserId().equals(userId))
+                            .collect(Collectors.toList());
+                    return new ResponseEntity<>(objectives, HttpStatus.OK);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
 
     //我不知道这个方法写的对不对@Michale  --Froggy
     @RequestMapping(method = GET, value = "/{ObjectiveId}/assignment")
@@ -119,7 +171,7 @@ public class ObjectiveController {
     }
 
     @RequestMapping(method = PATCH, value = "/{ObjectiveId}/assignment")
-    ResponseEntity<?> join (@PathVariable ObjectId objectiveId,HttpSession httpSession){
+    ResponseEntity<?> join (@PathVariable ObjectId objectiveId, HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId).map(user -> {
             //将userId放到objective下

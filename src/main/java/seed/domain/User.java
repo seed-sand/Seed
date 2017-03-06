@@ -44,7 +44,7 @@ public class User {
     private String avatar;
     private List<ObjectId> ObjectiveCreated;
     private List<ObjectId> ObjectiveJoined;
-    private List<ObjectId> ObjectiveListCreated = null;
+    private List<ObjectId> ObjectiveListCreated;
 
     public User(String username, String identity, String password, boolean useWechat) {
         this.username = username;
