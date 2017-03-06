@@ -85,9 +85,11 @@ public class ObjectiveListControllerTest {
         this.objectiveRepository.deleteAll();
         this.userRepository.deleteAll();
 
-        this.objectiveList = objectiveListRepository.insert(new ObjectiveList("tech"));
-
         this.user = userRepository.insert(new User("Tom", "Tom@testUser.com", "123456", false));
+
+        objectiveList = new ObjectiveList("tech");
+        objectiveList.setUserId(user.getId());
+        this.objectiveList = objectiveListRepository.insert(objectiveList);
 
         this.objective1 = objectiveRepository.insert(new Objective("drink"));
         this.objective2 = objectiveRepository.insert(new Objective("eat"));
@@ -99,6 +101,7 @@ public class ObjectiveListControllerTest {
     @Test
     public void create() throws Exception {
         objectiveList.setId(null);
+        objectiveList.setUserId(null);
         mockMvc.perform(post("/objectiveList")
                         .sessionAttrs(sessionAttr)
                         .content(this.json(objectiveList))
@@ -108,15 +111,13 @@ public class ObjectiveListControllerTest {
 
     @Test
     public void update() throws Exception {
-        objectiveList.setUserId(user.getId());
-        objectiveList = objectiveListRepository.save(objectiveList);
         objectiveList.setTitle("health");
         objectiveList.setDescription("objectives for health");
         List<ObjectId> objectives = Optional.ofNullable(objectiveList.getObjectives()).orElse(new ArrayList<>());
         objectives.add(objective1.getId());
         objectives.add(objective2.getId());
         objectiveList.setObjectives(objectives);
-        mockMvc.perform(patch("/objectiveList/"+objectiveList.getId())
+        mockMvc.perform(put("/objectiveList/" + objectiveList.getId())
                 .sessionAttrs(sessionAttr)
                 .content(this.json(objectiveList))
                 .contentType(contentType))
@@ -125,7 +126,7 @@ public class ObjectiveListControllerTest {
 
     @Test
     public void getProfile() throws Exception {
-        mockMvc.perform(get("/objectiveList/"+objectiveList.getId())
+        mockMvc.perform(get("/objectiveList/" + objectiveList.getId())
                 .sessionAttrs(sessionAttr)
                 .contentType(contentType))
                 .andExpect(status().isOk());
@@ -133,12 +134,28 @@ public class ObjectiveListControllerTest {
 
     @Test
     public void remove() throws Exception {
-        objectiveList.setUserId(user.getId());
-        objectiveList = objectiveListRepository.save(objectiveList);
-        mockMvc.perform(delete("/objectiveList/"+objectiveList.getId())
+        mockMvc.perform(delete("/objectiveList/" + objectiveList.getId())
                 .sessionAttrs(sessionAttr)
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void pushObjective() throws Exception {
+        mockMvc.perform(patch("/objectiveList/" + objectiveList.getId() + "/objective")
+                .sessionAttrs(sessionAttr)
+                .content(json(objective1))
+                .contentType(contentType))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void popObjective() throws Exception {
+        mockMvc.perform(delete("/objectiveList/" + objectiveList.getId() + "/objective")
+                .sessionAttrs(sessionAttr)
+                .content(json(objective1.getId()))
+                .contentType(contentType))
+                .andExpect(status().isOk());
     }
 
     protected String json(Object o) throws IOException {

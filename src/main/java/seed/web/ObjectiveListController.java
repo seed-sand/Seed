@@ -80,7 +80,7 @@ public class ObjectiveListController {
 
     }
 
-    @RequestMapping(method = PATCH, value = "/{objectiveListId}")
+    @RequestMapping(method = PUT, value = "/{objectiveListId}")
     ResponseEntity<?> update(@PathVariable ObjectId objectiveListId,
                              @RequestBody ObjectiveList objectiveList,
                              HttpSession httpSession) {
@@ -109,7 +109,7 @@ public class ObjectiveListController {
                         "objective list"));
     }
 
-    @RequestMapping(method = PUT, value = "/{objectiveListId}/objective")
+    @RequestMapping(method = PATCH, value = "/{objectiveListId}/objective")
     ResponseEntity<?> pushObjective(@PathVariable ObjectId objectiveListId,
                                     @RequestBody Objective objective,
                                     HttpSession httpSession) {
