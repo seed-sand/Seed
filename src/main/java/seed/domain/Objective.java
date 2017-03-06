@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
+import seed.util.JsonJodaDateTimeSerializer;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class Objective {
     private String title;
     private String description;
 
+    @JsonSerialize(using = JsonJodaDateTimeSerializer.class)
     private DateTime deadline;
     private int priority;
     private boolean status;
