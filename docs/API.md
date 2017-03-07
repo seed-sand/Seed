@@ -376,7 +376,7 @@ API设计文档
 
 ### Objective - 加入目标
 
-`PUT`
+`PATCH`
 
 ```
 /objectives/:objectiveId/assignments
@@ -575,7 +575,7 @@ API设计文档
 
 ### ObjectiveList - 添加目标
 
-`PUT`
+`PATCH`
 
 ```
 /objectiveLists/:objectiveListId/objective

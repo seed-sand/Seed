@@ -1,5 +1,7 @@
 package seed.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.Id;
@@ -15,10 +17,12 @@ import java.util.List;
 @Document
 public class ObjectiveList {
     @Id
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
 
     @Indexed
     @NotEmpty
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId userId;
 
     @NotEmpty

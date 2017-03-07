@@ -97,8 +97,9 @@ public class ObjectiveController {
                             //判断目标的用户id和当前session的用户id是否相同。
                             .filter(objective2 -> objective2.getUserId().equals(userId))
                             .map(objective2 -> {
-                                objective.setId(objective1.getId());
-
+                                objective.setId(objectiveId);
+                                objective.setUserId(userId);
+                                objective.setListId(objective2.getListId());
                                 //更新目标
                                 return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);
                             })
@@ -119,7 +120,7 @@ public class ObjectiveController {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
-                    List<ObjectId> objectives = Optional.ofNullable(user.getObjectiveListCreated())
+                    List<ObjectId> objectives = Optional.ofNullable(user.getObjectiveCreated())
                             .orElse(new ArrayList<>());
                     return new ResponseEntity<>(objectives, HttpStatus.OK);
                 })
@@ -196,7 +197,7 @@ public class ObjectiveController {
         }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
     }
 
-    @RequestMapping(method = DELETE,value = "/{objectiveId}/assignment")
+    @RequestMapping(method = DELETE, value = "/{objectiveId}/assignment")
     ResponseEntity<?> leave (@PathVariable ObjectId objectiveId, HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId).map(user -> {

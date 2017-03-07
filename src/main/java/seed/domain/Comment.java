@@ -24,7 +24,7 @@ public class Comment {
     }
 
     public void setUserId(ObjectId userId){
-        this.userId=userId;
+        this.userId = userId;
     }
 
     public ObjectId getUserId(ObjectId userId){
@@ -32,7 +32,7 @@ public class Comment {
     }
 
     public void setContent(String content){
-        this.content=content;
+        this.content = content;
     }
 
     public String getContent(String content){

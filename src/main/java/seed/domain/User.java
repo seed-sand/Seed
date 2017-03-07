@@ -63,7 +63,7 @@ public class User {
     }
 
     public void setId(ObjectId id) {
-        id = id;
+        this.id = id;
     }
 
     private void setPassword(String password) {

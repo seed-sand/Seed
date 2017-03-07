@@ -22,6 +22,7 @@ public class Objective {
     private ObjectId id;
 
     @Indexed
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId userId;
 
     @Indexed
@@ -46,7 +47,7 @@ public class Objective {
     }
 
     public void setId(ObjectId id) {
-        id = id;
+        this.id = id;
     }
 
     public ObjectId getUserId() {
@@ -57,7 +58,7 @@ public class Objective {
         this.userId = userId;
     }
 
-    public ObjectId getListIdId() {
+    public ObjectId getListId() {
         return listId;
     }
 

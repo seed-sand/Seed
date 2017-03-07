@@ -54,7 +54,7 @@ public class ObjectiveRepositoryTest {
         objective4 = new Objective("Riko");
         id1 = objectiveRepository.insert(objective1).getId();
         id2 = objectiveRepository.insert(objective2).getUserId();
-        id3 = objectiveRepository.insert(objective3).getListIdId();
+        id3 = objectiveRepository.insert(objective3).getListId();
         id4 = objectiveRepository.insert(objective4).getDeadline();
         objective1.setPriority(1);
         objective1.setStatus(true);
