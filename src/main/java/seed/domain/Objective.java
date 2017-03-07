@@ -37,7 +37,6 @@ public class Objective {
     private DateTime deadline;
     private int priority;
     private boolean status = true;
-    @JsonSerialize(using = ToStringSerializer.class)
     private List<ObjectId> assignment;
 
     @Field("comments")

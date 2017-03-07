@@ -29,7 +29,6 @@ public class ObjectiveList {
     private String title;
     private String description;
 
-    @JsonSerialize(using = ToStringSerializer.class)
     private List<ObjectId> objectives;
 
     public ObjectiveList(String title) {
