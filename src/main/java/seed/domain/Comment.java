@@ -1,5 +1,7 @@
 package seed.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -10,12 +12,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * 2017-03-02.
  */
 
-@Document
 public class Comment {
     @Indexed
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId userId;
 
     @NotEmpty
+    @JsonSerialize(using = ToStringSerializer.class)
     private String content;
 
     public Comment(ObjectId userId, String content){

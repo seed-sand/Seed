@@ -7,7 +7,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
@@ -35,8 +37,11 @@ public class Objective {
     private DateTime deadline;
     private int priority;
     private boolean status = true;
+    @JsonSerialize(using = ToStringSerializer.class)
     private List<ObjectId> assignment;
-    private List<ObjectId> comments;
+
+    @Field("comments")
+    private List<Comment> comments;
 
     public Objective(String title) {
         this.title = title;
@@ -114,11 +119,11 @@ public class Objective {
         this.assignment = assignment;
     }
 
-    public List<ObjectId> getComments() {
+    public List<Comment> getComments() {
         return comments;
     }
 
-    public void setComments(List<ObjectId> comments) {
+    public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
 

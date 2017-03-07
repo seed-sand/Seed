@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import seed.Application;
+import seed.domain.Comment;
 import seed.domain.Objective;
 import seed.domain.User;
 import seed.repository.ObjectiveListRepository;
@@ -155,7 +156,7 @@ public class ObjectiveControllerTest {
     public void join() throws Exception {
         mockMvc.perform(patch("/objective/" + objective.getId() + "/assignment")
                 .sessionAttrs(sessionAttr)
-                .content(json(objective))
+                .content(this.json(objective))
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -165,7 +166,7 @@ public class ObjectiveControllerTest {
     public void leave() throws Exception {
         mockMvc.perform(delete("/objective/" + objective.getId() + "/assignment")
                 .sessionAttrs(sessionAttr)
-                .content(json(objective.getId()))
+                .content(this.json(objective.getId()))
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -197,6 +198,17 @@ public class ObjectiveControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
 
+    }
+
+    @Test
+    public void comment() throws Exception {
+        Comment comment = new Comment(user.getId(), "comment for my own.");
+        mockMvc.perform(post("/objective/" + objective.getId() + "/comment")
+                .sessionAttrs(sessionAttr)
+                .content(this.json(comment))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isCreated());
     }
 
     protected String json(Object o) throws IOException {
