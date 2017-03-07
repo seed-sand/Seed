@@ -44,8 +44,11 @@ public class User {
     private String openId;
 
     private String avatar;
+    @JsonSerialize(using = ToStringSerializer.class)
     private List<ObjectId> ObjectiveCreated;
+    @JsonSerialize(using = ToStringSerializer.class)
     private List<ObjectId> ObjectiveJoined;
+    @JsonSerialize(using = ToStringSerializer.class)
     private List<ObjectId> ObjectiveListCreated;
 
     public User(String username, String identity, String password, boolean useWechat) {

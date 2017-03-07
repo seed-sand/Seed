@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import seed.domain.Comment;
 import seed.domain.Objective;
 import seed.exception.InvalidFieldException;
 import seed.exception.ResourceNotFoundException;
@@ -215,5 +216,28 @@ public class ObjectiveController {
             userRepository.save(user);
             return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);
         }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
+    }
+
+    @RequestMapping(method = POST, value = "/{objectiveId}/comment")
+    ResponseEntity<?> comment (@PathVariable ObjectId objectiveId,
+                               @RequestBody Comment comment,
+                               HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Objective objective = objectiveRepository.findById(objectiveId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                    return Optional.of(objective)
+                            .filter(objective1 -> objective.getUserId().equals(userId))
+                            .map(objective1 -> {
+                                List<Comment> comments = Optional.ofNullable(objective1.getComments())
+                                        .orElse(new ArrayList<>());
+                                comments.add(comment);
+                                objective1.setComments(comments);
+                                return new ResponseEntity<>(objectiveRepository.save(objective1), HttpStatus.CREATED);
+                            })
+                            .orElseThrow(UnauthorizedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
     }
 }
