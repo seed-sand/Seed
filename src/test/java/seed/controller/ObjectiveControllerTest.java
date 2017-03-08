@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import seed.Application;
 import seed.domain.Comment;
+import seed.domain.Event;
 import seed.domain.Objective;
 import seed.domain.User;
 import seed.repository.ObjectiveListRepository;
@@ -206,6 +207,17 @@ public class ObjectiveControllerTest {
         mockMvc.perform(post("/objective/" + objective.getId() + "/comment")
                 .sessionAttrs(sessionAttr)
                 .content(this.json(comment))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void event() throws Exception {
+        Event event = new Event("drink", new DateTime(2019, 3, 4, 5, 6, 7), true);
+        mockMvc.perform(post("/objective/" + objective.getId() + "/event")
+                .sessionAttrs(sessionAttr)
+                .content(this.json(event))
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isCreated());

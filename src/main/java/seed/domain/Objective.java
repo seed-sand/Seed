@@ -2,6 +2,7 @@ package seed.domain;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.joda.ser.DateTimeSerializer;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
@@ -34,10 +35,16 @@ public class Objective {
     private String title;
     private String description;
 
+    @JsonSerialize(using = DateTimeSerializer.class)
+    private DateTime startTime;
+    @JsonSerialize(using = DateTimeSerializer.class)
     private DateTime deadline;
     private int priority;
     private boolean status = true;
     private List<ObjectId> assignment;
+
+    @Field("events")
+    private List<Event> events;
 
     @Field("comments")
     private List<Comment> comments;
@@ -124,6 +131,22 @@ public class Objective {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
+
+    public DateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(DateTime startTime) {
+        this.startTime = startTime;
     }
 
     protected Objective() {

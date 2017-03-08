@@ -12,6 +12,6 @@ import seed.domain.Objective;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class RequiredFieldMissingException extends RuntimeException {
     public RequiredFieldMissingException(String field){
-        super("Required Field" + field + "missing");
+        super("Required Field " + field + " missing");
     }
 }

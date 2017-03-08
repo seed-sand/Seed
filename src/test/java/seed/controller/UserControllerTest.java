@@ -94,6 +94,16 @@ public class UserControllerTest {
     }
 
     @Test
+    public void signupDuplicate() throws Exception {
+        mockMvc.perform(post("/user")
+                .content(this.json(user))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isConflict());
+    }
+
+
+    @Test
     public void login() throws Exception {
         AuthCert authCert = new AuthCert();
         authCert.email = "Tom@testUser.com";

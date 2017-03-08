@@ -1,5 +1,6 @@
 package seed.web;
 
+import com.sun.org.apache.regexp.internal.RE;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import seed.domain.Comment;
+import seed.domain.Event;
 import seed.domain.Objective;
 import seed.exception.InvalidFieldException;
 import seed.exception.ResourceNotFoundException;
@@ -176,7 +178,7 @@ public class ObjectiveController {
     }
 
     @RequestMapping(method = PATCH, value = "/{objectiveId}/assignment")
-    ResponseEntity<?> join (@PathVariable ObjectId objectiveId, HttpSession httpSession){
+    ResponseEntity<?> join(@PathVariable ObjectId objectiveId, HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId).map(user -> {
             //将userId放到objective下
@@ -199,7 +201,7 @@ public class ObjectiveController {
     }
 
     @RequestMapping(method = DELETE, value = "/{objectiveId}/assignment")
-    ResponseEntity<?> leave (@PathVariable ObjectId objectiveId, HttpSession httpSession){
+    ResponseEntity<?> leave(@PathVariable ObjectId objectiveId, HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId).map(user -> {
             //将objective下的userId移除
@@ -219,9 +221,9 @@ public class ObjectiveController {
     }
 
     @RequestMapping(method = POST, value = "/{objectiveId}/comment")
-    ResponseEntity<?> comment (@PathVariable ObjectId objectiveId,
-                               @RequestBody Comment comment,
-                               HttpSession httpSession) {
+    ResponseEntity<?> comment(@PathVariable ObjectId objectiveId,
+                              @RequestBody Comment comment,
+                              HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -234,6 +236,29 @@ public class ObjectiveController {
                                         .orElse(new ArrayList<>());
                                 comments.add(comment);
                                 objective1.setComments(comments);
+                                return new ResponseEntity<>(objectiveRepository.save(objective1), HttpStatus.CREATED);
+                            })
+                            .orElseThrow(UnauthorizedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
+    @RequestMapping(method = POST, value = "/{objectiveId}/event")
+    ResponseEntity<?> event(@PathVariable ObjectId objectiveId,
+                            @RequestBody Event event,
+                            HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Objective objective = objectiveRepository.findById(objectiveId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                    return Optional.of(objective)
+                            .filter(objective1 -> objective.getUserId().equals(userId))
+                            .map(objective1 -> {
+                                List<Event> events = Optional.ofNullable(objective1.getEvents())
+                                        .orElse(new ArrayList<>());
+                                events.add(event);
+                                objective1.setEvents(events);
                                 return new ResponseEntity<>(objectiveRepository.save(objective1), HttpStatus.CREATED);
                             })
                             .orElseThrow(UnauthorizedException::new);

@@ -66,7 +66,7 @@ public class User {
         this.id = id;
     }
 
-    private void setPassword(String password) {
+    public void setPassword(String password) {
         this.password = encrypt("SHA1", password);
     }
 

@@ -2,13 +2,16 @@ package seed.web;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import seed.domain.AuthCert;
+import seed.domain.Message;
 import seed.domain.User;
+import seed.exception.DuplicateFieldException;
 import seed.exception.IncorrectPasswordException;
 import seed.exception.ResourceNotFoundException;
 import seed.exception.UnauthorizedException;
@@ -39,7 +42,12 @@ public class UserController {
 
     @RequestMapping(method = POST)
     ResponseEntity<?> signup(@RequestBody User user, HttpSession httpSession) {
-        return new ResponseEntity<>(userRepository.insert(user), HttpStatus.CREATED);
+        try {
+            return new ResponseEntity<>(userRepository.insert(user), HttpStatus.CREATED);
+        } catch (DuplicateKeyException e) {
+            throw  new DuplicateFieldException(user.getEmail() == null ? "email" : "openId",
+                    user.getEmail() == null ? user.getEmail() : user.getOpenId());
+        }
     }
 
     @RequestMapping(method = POST, value = "log-in")
@@ -50,7 +58,7 @@ public class UserController {
                     .orElseThrow(() -> new ResourceNotFoundException(authCert.openid ,"user"));
         } else {
             user = this.userRepository.findByEmail(authCert.email)
-                    .orElseThrow(() -> new ResourceNotFoundException(authCert.openid ,"user"));
+                    .orElseThrow(() -> new ResourceNotFoundException(authCert.email ,"user"));
         }
 
         return Optional.of(user).filter(user1 -> user1.passwordAuthenticate(authCert.password))
@@ -70,7 +78,11 @@ public class UserController {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(userId ,"user"));
         return Optional.of(user).filter(user1 -> user1.passwordAuthenticate(oldPassword))
-                .map(user1 -> new ResponseEntity<>(user, HttpStatus.OK))
+                .map(user1 -> {
+                    user.setPassword(newPassword);
+                    userRepository.save(user);
+                    return new ResponseEntity<>(new Message(0, "success"), HttpStatus.OK);
+                })
                 .orElseThrow(IncorrectPasswordException::new);
     }
 
@@ -88,5 +100,5 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-
+    //TODO: get related users.
 }
