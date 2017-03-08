@@ -1,6 +1,5 @@
 package seed.web;
 
-import com.sun.org.apache.regexp.internal.RE;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;

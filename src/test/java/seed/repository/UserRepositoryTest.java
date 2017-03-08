@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import seed.Application;
 import seed.domain.User;
-import seed.repository.UserRepository;
 
 import static org.junit.Assert.*;
 

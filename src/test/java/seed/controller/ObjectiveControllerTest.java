@@ -1,6 +1,5 @@
 package seed.controller;
 
-import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
@@ -21,7 +20,6 @@ import seed.domain.Comment;
 import seed.domain.Event;
 import seed.domain.Objective;
 import seed.domain.User;
-import seed.repository.ObjectiveListRepository;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
