@@ -15,6 +15,7 @@ import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ public class ObjectiveListController {
     }
 
     @RequestMapping(method = POST)
-    ResponseEntity<?> create(@RequestBody ObjectiveList objectiveList, HttpSession httpSession) {
+    ResponseEntity<?> create(@RequestBody @Valid ObjectiveList objectiveList, HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
@@ -85,7 +86,7 @@ public class ObjectiveListController {
 
     @RequestMapping(method = PUT, value = "/{objectiveListId}")
     ResponseEntity<?> update(@PathVariable ObjectId objectiveListId,
-                             @RequestBody ObjectiveList objectiveList,
+                             @RequestBody @Valid ObjectiveList objectiveList,
                              HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)

@@ -16,10 +16,14 @@ import seed.exception.InvalidFieldException;
 import seed.exception.ResourceNotFoundException;
 import seed.exception.UnauthenticatedException;
 import seed.exception.UnauthorizedException;
+import seed.repository.CommentRepository;
+import seed.repository.EventRepository;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
 import javax.servlet.http.HttpSession;
+import javax.swing.text.html.Option;
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,15 +42,19 @@ import static seed.util.Encryption.encrypt;
 public class ObjectiveController {
     private final UserRepository userRepository;
     private final ObjectiveRepository objectiveRepository;
+    private final CommentRepository commentRepository;
+    private final EventRepository eventRepository;
 
     @Autowired
-    public ObjectiveController(UserRepository userRepository, ObjectiveRepository objectiveRepository){
+    public ObjectiveController(UserRepository userRepository, ObjectiveRepository objectiveRepository, CommentRepository commentRepository, EventRepository eventRepository){
         this.userRepository = userRepository;
         this.objectiveRepository = objectiveRepository;
+        this.commentRepository = commentRepository;
+        this.eventRepository = eventRepository;
     }
 
     @RequestMapping(method = POST)
-    ResponseEntity<?> creat(@RequestBody Objective objective, HttpSession httpSession){
+    ResponseEntity<?> creat(@RequestBody @Valid Objective objective, HttpSession httpSession){
         ObjectId userId = (ObjectId)httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map( user -> {
@@ -85,7 +93,7 @@ public class ObjectiveController {
 
     @RequestMapping(method = PUT, value = "/{objectiveId}")
     ResponseEntity<?> update(@PathVariable ObjectId objectiveId,
-                             @RequestBody Objective objective,
+                             @RequestBody @Valid Objective objective,
                              HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         //通过userId找到用户，再将用户map()为目标
@@ -221,7 +229,7 @@ public class ObjectiveController {
 
     @RequestMapping(method = POST, value = "/{objectiveId}/comment")
     ResponseEntity<?> comment(@PathVariable ObjectId objectiveId,
-                              @RequestBody Comment comment,
+                              @RequestBody @Valid Comment comment,
                               HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
@@ -229,11 +237,11 @@ public class ObjectiveController {
                     Objective objective = objectiveRepository.findById(objectiveId)
                             .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
                     return Optional.of(objective)
-                            .filter(objective1 -> objective.getUserId().equals(userId))
+                            .filter(objective1 -> objective1.getUserId().equals(userId))
                             .map(objective1 -> {
-                                List<Comment> comments = Optional.ofNullable(objective1.getComments())
+                                List<ObjectId> comments = Optional.ofNullable(objective1.getComments())
                                         .orElse(new ArrayList<>());
-                                comments.add(comment);
+                                comments.add(commentRepository.insert(comment).getId());
                                 objective1.setComments(comments);
                                 return new ResponseEntity<>(objectiveRepository.save(objective1), HttpStatus.CREATED);
                             })
@@ -242,9 +250,52 @@ public class ObjectiveController {
                 .orElseThrow(UnauthenticatedException::new);
     }
 
+    @RequestMapping(method = GET, value = "/{objectiveId}/comment")
+    ResponseEntity<?> getComments(@PathVariable ObjectId objectiveId,
+                                  @RequestParam(value = "page", defaultValue = "0") int page,
+                                  @RequestParam(value = "size", defaultValue = "7") int size,
+                                  @RequestParam(value = "sort", defaultValue = "ASC") Sort.Direction direction,
+                                  HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Objective objective = objectiveRepository.findById(objectiveId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                    return Optional.of(objective)
+                            .filter(objective1 -> objective1.getUserId().equals(userId))
+                            .map(objective1 -> new ResponseEntity<>(commentRepository.findByObjectiveId(objective1.getId(),
+                                    new PageRequest(page,
+                                            size,
+                                            new Sort(direction, "id"))), HttpStatus.OK))
+                            .orElseThrow(UnauthorizedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
+    @RequestMapping(method = DELETE, value = "/{objectiveId}/comment/{commentId}")
+    ResponseEntity<?> deleteComments(@PathVariable ObjectId objectiveId,
+                                     @PathVariable ObjectId commentId,
+                                     HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Objective objective = objectiveRepository.findById(objectiveId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                    return Optional.of(objective)
+                            .filter(objective1 -> objective1.getUserId().equals(userId))
+                            .map(objective1 -> {
+                                commentRepository.delete(commentId);
+                                //TODO: 这里需要捕获异常吗？
+                                return ResponseEntity.noContent().build();
+                            })
+                            .orElseThrow(UnauthorizedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
     @RequestMapping(method = POST, value = "/{objectiveId}/event")
     ResponseEntity<?> event(@PathVariable ObjectId objectiveId,
-                            @RequestBody Event event,
+                            @RequestBody @Valid Event event,
                             HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
@@ -252,11 +303,11 @@ public class ObjectiveController {
                     Objective objective = objectiveRepository.findById(objectiveId)
                             .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
                     return Optional.of(objective)
-                            .filter(objective1 -> objective.getUserId().equals(userId))
+                            .filter(objective1 -> objective1.getUserId().equals(userId))
                             .map(objective1 -> {
-                                List<Event> events = Optional.ofNullable(objective1.getEvents())
+                                List<ObjectId> events = Optional.ofNullable(objective1.getEvents())
                                         .orElse(new ArrayList<>());
-                                events.add(event);
+                                events.add(eventRepository.insert(event).getId());
                                 objective1.setEvents(events);
                                 return new ResponseEntity<>(objectiveRepository.save(objective1), HttpStatus.CREATED);
                             })
@@ -264,4 +315,85 @@ public class ObjectiveController {
                 })
                 .orElseThrow(UnauthenticatedException::new);
     }
+
+    @RequestMapping(method = GET, value = "/{objectiveId}/event")
+    ResponseEntity<?> getEvents(@PathVariable ObjectId objectiveId,
+                                @RequestParam(value = "page", defaultValue = "0") int page,
+                                @RequestParam(value = "size", defaultValue = "7") int size,
+                                @RequestParam(value = "sort", defaultValue = "ASC") Sort.Direction direction,
+                                HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Objective objective = objectiveRepository.findById(objectiveId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                    return Optional.of(objective)
+                            .filter(objective1 -> objective1.getUserId().equals(userId))
+                            .map(objective1 -> new ResponseEntity<>(eventRepository.findByObjectiveId(objective1.getId(),
+                                    new PageRequest(page,
+                                            size,
+                                            new Sort(direction, "id"))), HttpStatus.OK))
+                            .orElseThrow(UnauthorizedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
+    @RequestMapping(method = GET, value = "/{objectiveId}/event/{eventId}")
+    ResponseEntity<?> getEvent(@PathVariable ObjectId objectiveId,
+                               @PathVariable ObjectId eventId,
+                               HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Objective objective = objectiveRepository.findById(objectiveId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                    return Optional.of(objective)
+                            .filter(objective1 -> objective1.getUserId().equals(userId))
+                            .filter(objective1 -> objective1.getEvents().contains(eventId))
+                            .map(objective1 -> new ResponseEntity<>(eventRepository.findById(eventId), HttpStatus.OK))
+                            .orElseThrow(UnauthorizedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
+    @RequestMapping(method = PUT, value = "/{objectiveId}/event/{eventId}")
+    ResponseEntity<?> updateEvent(@PathVariable ObjectId objectiveId,
+                                  @PathVariable ObjectId eventId,
+                                  @RequestBody Event event,
+                                  HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Objective objective = objectiveRepository.findById(objectiveId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                    return Optional.of(objective)
+                            .filter(objective1 -> objective1.getUserId().equals(userId))
+                            .filter(objective1 -> objective1.getEvents().contains(eventId))
+                            .map(objective1 -> new ResponseEntity<>(eventRepository.save(event), HttpStatus.OK))
+                            .orElseThrow(UnauthorizedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
+    @RequestMapping(method = DELETE, value = "/{objectiveId}/event/{eventId}")
+    ResponseEntity<?> deleteEvent(@PathVariable ObjectId objectiveId,
+                                  @PathVariable ObjectId eventId,
+                                  HttpSession httpSession) {
+        ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
+        return userRepository.findById(userId)
+                .map(user -> {
+                    Objective objective = objectiveRepository.findById(objectiveId)
+                            .orElseThrow(() -> new ResourceNotFoundException(objectiveId, "objective"));
+                    return Optional.of(objective)
+                            .filter(objective1 -> objective1.getUserId().equals(userId))
+                            .filter(objective1 -> objective1.getEvents().contains(eventId))
+                            .map(objective1 -> {
+                                eventRepository.delete(eventId);
+                                return ResponseEntity.noContent().build();
+                            })
+                            .orElseThrow(UnauthorizedException::new);
+                })
+                .orElseThrow(UnauthenticatedException::new);
+    }
+
 }

@@ -19,6 +19,7 @@ import seed.repository.UserRepository;
 
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class UserController {
     }
 
     @RequestMapping(method = POST)
-    ResponseEntity<?> signup(@RequestBody User user, HttpSession httpSession) {
+    ResponseEntity<?> signup(@RequestBody @Valid User user, HttpSession httpSession) {
         try {
             return new ResponseEntity<>(userRepository.insert(user), HttpStatus.CREATED);
         } catch (DuplicateKeyException e) {
@@ -51,7 +52,7 @@ public class UserController {
     }
 
     @RequestMapping(method = POST, value = "log-in")
-    ResponseEntity<?> login(@RequestBody AuthCert authCert, HttpSession httpSession) {
+    ResponseEntity<?> login(@RequestBody @Valid AuthCert authCert, HttpSession httpSession) {
         User user;
         if(authCert.useWechat) {
             user = this.userRepository.findByOpenId(authCert.openid)
@@ -71,8 +72,8 @@ public class UserController {
 
     @RequestMapping(method = PATCH, value = "/password")
     ResponseEntity<?> ChangePassword(@RequestBody String oldPassword,
-                        @RequestBody String newPassword,
-                        HttpSession httpSession) {
+                                     @RequestBody String newPassword,
+                                     HttpSession httpSession) {
 
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         User user = userRepository.findById(userId)

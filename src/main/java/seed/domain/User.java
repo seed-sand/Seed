@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static seed.util.Encryption.encrypt;
@@ -41,9 +42,9 @@ public class User {
     private String openId;
 
     private String avatar;
-    private List<ObjectId> ObjectiveCreated;
-    private List<ObjectId> ObjectiveJoined;
-    private List<ObjectId> ObjectiveListCreated;
+    private List<ObjectId> ObjectiveCreated = new ArrayList<>(0);
+    private List<ObjectId> ObjectiveJoined = new ArrayList<>(0);
+    private List<ObjectId> ObjectiveListCreated = new ArrayList<>(0);
 
     public User(String username, String identity, String password, boolean useWechat) {
         this.username = username;
