@@ -168,7 +168,7 @@ public class ObjectiveControllerTest {
                 .content(this.json(objective.getId()))
                 .contentType(contentType))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

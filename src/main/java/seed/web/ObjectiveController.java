@@ -223,7 +223,7 @@ public class ObjectiveController {
             objectiveJoined = objectiveJoined.stream().filter(id -> id != objectiveId).collect(Collectors.toList());
             user.setObjectiveJoined(objectiveJoined);
             userRepository.save(user);
-            return new ResponseEntity<>(objectiveRepository.save(objective), HttpStatus.OK);
+            return ResponseEntity.noContent().build();
         }).orElseThrow(() -> new ResourceNotFoundException(userId,"userId"));
     }
 

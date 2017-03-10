@@ -22,7 +22,6 @@ public class ObjectiveList {
     private ObjectId id;
 
     @Indexed
-    @NotEmpty
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId userId;
 

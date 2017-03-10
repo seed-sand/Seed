@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -82,7 +81,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signup() throws Exception {
+    public void signUp() throws Exception {
         this.userRepository.deleteAll();
         user.setId(null);
         mockMvc.perform(post("/user")
@@ -93,7 +92,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signupDuplicate() throws Exception {
+    public void signUpDuplicate() throws Exception {
         mockMvc.perform(post("/user")
                 .content(this.json(user))
                 .contentType(contentType))

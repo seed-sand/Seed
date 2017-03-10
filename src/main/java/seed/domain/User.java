@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,12 +27,10 @@ public class User {
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
 
-    @NotBlank
-    @NotEmpty
+//    @NotEmpty(message = "password!")
     private String password;
 
-    @NotBlank
-    @NotEmpty
+//    @NotEmpty(message = "username!")
     private String username;
 
     @Indexed(unique = true)

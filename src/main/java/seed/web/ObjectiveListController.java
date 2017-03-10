@@ -174,7 +174,7 @@ public class ObjectiveListController {
                                         .filter(objectId -> objectId != objectiveId)
                                         .collect(Collectors.toList());
                                 objectiveList1.setObjectives(objectives);
-                                return new ResponseEntity<>(objectiveListRepository.save(objectiveList1), HttpStatus.OK);
+                                return ResponseEntity.noContent().build();
                             })
                             .orElseThrow(UnauthorizedException::new);
                 })

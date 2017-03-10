@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @RequestMapping(method = POST)
-    ResponseEntity<?> signup(@RequestBody @Valid User user, HttpSession httpSession) {
+    ResponseEntity<?> signUp(@RequestBody @Valid User user, HttpSession httpSession) {
         try {
             return new ResponseEntity<>(userRepository.insert(user), HttpStatus.CREATED);
         } catch (DuplicateKeyException e) {
