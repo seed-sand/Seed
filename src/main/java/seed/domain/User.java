@@ -2,7 +2,6 @@ package seed.domain;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
@@ -11,8 +10,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 import static seed.util.Encryption.encrypt;
@@ -28,12 +27,10 @@ public class User {
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
 
-    @NotBlank
-    @NotEmpty
+//    @NotEmpty(message = "password!")
     private String password;
 
-    @NotBlank
-    @NotEmpty
+//    @NotEmpty(message = "username!")
     private String username;
 
     @Indexed(unique = true)
@@ -44,9 +41,9 @@ public class User {
     private String openId;
 
     private String avatar;
-    private List<ObjectId> ObjectiveCreated;
-    private List<ObjectId> ObjectiveJoined;
-    private List<ObjectId> ObjectiveListCreated;
+    private List<ObjectId> ObjectiveCreated = new ArrayList<>(0);
+    private List<ObjectId> ObjectiveJoined = new ArrayList<>(0);
+    private List<ObjectId> ObjectiveListCreated = new ArrayList<>(0);
 
     public User(String username, String identity, String password, boolean useWechat) {
         this.username = username;
@@ -66,7 +63,7 @@ public class User {
         this.id = id;
     }
 
-    private void setPassword(String password) {
+    public void setPassword(String password) {
         this.password = encrypt("SHA1", password);
     }
 

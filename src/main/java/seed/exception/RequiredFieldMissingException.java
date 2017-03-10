@@ -2,7 +2,6 @@ package seed.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import seed.domain.Objective;
 
 /**
  * Created by Froggy
@@ -12,6 +11,6 @@ import seed.domain.Objective;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class RequiredFieldMissingException extends RuntimeException {
     public RequiredFieldMissingException(String field){
-        super("Required Field" + field + "missing");
+        super("Required Field " + field + " missing");
     }
 }

@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.omg.CORBA.PUBLIC_MEMBER;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,9 +19,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import seed.Application;
 import seed.domain.Comment;
+import seed.domain.Event;
 import seed.domain.Objective;
 import seed.domain.User;
-import seed.repository.ObjectiveListRepository;
+import seed.repository.CommentRepository;
+import seed.repository.EventRepository;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
 
@@ -32,6 +35,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
@@ -54,10 +58,22 @@ public class ObjectiveControllerTest {
 
     private Objective objective;
 
+    private  Event event1;
+
+    private  Event event2;
+
+    private  Comment comment;
+
     private HashMap<String, Object> sessionAttr;
 
     @Autowired
     private ObjectiveRepository objectiveRepository;
+
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -87,11 +103,22 @@ public class ObjectiveControllerTest {
         this.user = userRepository.insert(new User("Tom", "Tom@testUser.com", "123456", false));
 
         objective = new Objective("tech");
+        Event event1 = new Event("drink", new DateTime(2019, 3, 4, 5, 6, 7), true);
+        Event event2 = new Event("eat", new DateTime(2019, 3, 4, 6, 6, 7), true);
+        comment = commentRepository.insert(new Comment(user.getId(), "comment for my own."));
         objective.setUserId(user.getId());
         objective.setDescription("objectives for tech");
         objective.setDeadline(new DateTime(2019, 2, 1, 8, 2, 0));
         objective.setPriority(3);
         objective.setStatus(true);
+        event1.setObjectiveId(objective.getId());
+        event2.setObjectiveId(objective.getId());
+        this.event1 = eventRepository.insert(event1);
+        this.event2 = eventRepository.insert(event2);
+        List<ObjectId> events = new ArrayList<>();
+        events.add(event1.getId());
+        events.add(event2.getId());
+        objective.setEvents(events);
         this.objective = objectiveRepository.insert(objective);
 
         //维持登录态
@@ -169,7 +196,7 @@ public class ObjectiveControllerTest {
                 .content(this.json(objective.getId()))
                 .contentType(contentType))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -202,13 +229,92 @@ public class ObjectiveControllerTest {
 
     @Test
     public void comment() throws Exception {
-        Comment comment = new Comment(user.getId(), "comment for my own.");
+        commentRepository.deleteAll();
+        this.comment.setId(null);
         mockMvc.perform(post("/objective/" + objective.getId() + "/comment")
                 .sessionAttrs(sessionAttr)
                 .content(this.json(comment))
                 .contentType(contentType))
                 .andDo(print())
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void getComments() throws Exception{
+        comment.setObjectiveId(objective.getId());
+        List<ObjectId> comments = objective.getComments();
+        comments.add(comment.getId());
+        objective.setComments(comments);
+        objectiveRepository.save(objective);
+        mockMvc.perform(get("/objective/" + objective.getId() + "/comment")
+                .sessionAttrs(sessionAttr)
+                .param("page","0")
+                .param("size","7")
+                .param("sort","ASC"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void deleteComments() throws Exception{
+        comment.setObjectiveId(objective.getId());
+        mockMvc.perform(delete("/objective/" + objective.getId() + "/comment/" + comment.getId())
+                .sessionAttrs(sessionAttr))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void event() throws Exception {
+        eventRepository.deleteAll();
+        event1.setId(null);
+        mockMvc.perform(post("/objective/" + objective.getId() + "/event")
+                .sessionAttrs(sessionAttr)
+                .content(this.json(event1))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void getEvents() throws Exception{
+        mockMvc.perform(get("/objective/" + objective.getId() + "/event")
+                .sessionAttrs(sessionAttr)
+                .param("page","0")
+                .param("size","7")
+                .param("sort","ASC"))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void getEvent() throws Exception{
+        mockMvc.perform(get("/objective/" + objective.getId() + "/event/" + event1.getId())
+                .sessionAttrs(sessionAttr))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void updateEvent() throws Exception{
+        event1.setEvent("Running");
+        event1.setEndTime(new DateTime("2017-05-26T11:28:50Z"));
+        event1.setStatus(true);
+
+        mockMvc.perform(put("/objective/" + objective.getId() + "/event/" + event1.getId())
+                .sessionAttrs(sessionAttr)
+                .content(this.json(event1))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void deleteEvent() throws Exception{
+        mockMvc.perform(delete("/objective/" + objective.getId() + "/event/" + event1.getId())
+                .sessionAttrs(sessionAttr))
+                .andDo(print())
+                .andExpect(status().isNoContent());
     }
 
     protected String json(Object o) throws IOException {

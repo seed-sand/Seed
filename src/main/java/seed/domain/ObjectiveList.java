@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +22,6 @@ public class ObjectiveList {
     private ObjectId id;
 
     @Indexed
-    @NotEmpty
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId userId;
 
@@ -29,7 +29,7 @@ public class ObjectiveList {
     private String title;
     private String description;
 
-    private List<ObjectId> objectives;
+    private List<ObjectId> objectives = new ArrayList<>(0);
 
     public ObjectiveList(String title) {
         this.title = title;

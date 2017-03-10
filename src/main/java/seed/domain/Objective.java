@@ -2,15 +2,16 @@ package seed.domain;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.datatype.joda.ser.DateTimeSerializer;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -34,13 +35,17 @@ public class Objective {
     private String title;
     private String description;
 
+    @JsonSerialize(using = DateTimeSerializer.class)
+    private DateTime startTime;
+    @JsonSerialize(using = DateTimeSerializer.class)
     private DateTime deadline;
     private int priority;
     private boolean status = true;
-    private List<ObjectId> assignment;
+    private List<ObjectId> assignment = new ArrayList<>(0);
 
-    @Field("comments")
-    private List<Comment> comments;
+    private List<ObjectId> events = new ArrayList<>(0);
+
+    private List<ObjectId> comments = new ArrayList<>(0);
 
     public Objective(String title) {
         this.title = title;
@@ -118,12 +123,28 @@ public class Objective {
         this.assignment = assignment;
     }
 
-    public List<Comment> getComments() {
+    public List<ObjectId> getComments() {
         return comments;
     }
 
-    public void setComments(List<Comment> comments) {
+    public void setComments(List<ObjectId> comments) {
         this.comments = comments;
+    }
+
+    public List<ObjectId> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<ObjectId> events) {
+        this.events = events;
+    }
+
+    public DateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(DateTime startTime) {
+        this.startTime = startTime;
     }
 
     protected Objective() {

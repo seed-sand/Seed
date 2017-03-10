@@ -13,7 +13,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import seed.Application;
 import seed.domain.AuthCert;
@@ -26,7 +25,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -83,7 +81,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signup() throws Exception {
+    public void signUp() throws Exception {
         this.userRepository.deleteAll();
         user.setId(null);
         mockMvc.perform(post("/user")
@@ -92,6 +90,16 @@ public class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isCreated());
     }
+
+    @Test
+    public void signUpDuplicate() throws Exception {
+        mockMvc.perform(post("/user")
+                .content(this.json(user))
+                .contentType(contentType))
+                .andDo(print())
+                .andExpect(status().isConflict());
+    }
+
 
     @Test
     public void login() throws Exception {

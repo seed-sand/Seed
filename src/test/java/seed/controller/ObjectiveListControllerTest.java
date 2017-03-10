@@ -105,7 +105,7 @@ public class ObjectiveListControllerTest {
     @Test
     public void create() throws Exception {
         objectiveList.setId(null);
-        objectiveList.setUserId(null);
+        objectiveList.setUserId(user.getId());
         mockMvc.perform(post("/objectiveList")
                 .sessionAttrs(sessionAttr)
                 .content(this.json(objectiveList))
@@ -171,7 +171,7 @@ public class ObjectiveListControllerTest {
                 .content(json(objective1.getId()))
                 .contentType(contentType))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     protected String json(Object o) throws IOException {
