@@ -29,7 +29,6 @@ public class Comment {
     private ObjectId userId;
 
     @NotEmpty
-    @JsonSerialize(using = ToStringSerializer.class)
     private String content;
 
     public Comment(ObjectId userId, String content){

@@ -241,6 +241,8 @@ public class ObjectiveController {
                             .map(objective1 -> {
                                 List<ObjectId> comments = Optional.ofNullable(objective1.getComments())
                                         .orElse(new ArrayList<>());
+                                comment.setUserId(userId);
+                                comment.setObjectiveId(objectiveId);
                                 comments.add(commentRepository.insert(comment).getId());
                                 objective1.setComments(comments);
                                 return new ResponseEntity<>(objectiveRepository.save(objective1), HttpStatus.CREATED);
@@ -285,6 +287,14 @@ public class ObjectiveController {
                             .filter(objective1 -> objective1.getUserId().equals(userId))
                             .map(objective1 -> {
                                 commentRepository.delete(commentId);
+                                List<ObjectId> comments = Optional.ofNullable(objective1.getEvents())
+                                        .orElse(new ArrayList<>());
+                                comments = comments
+                                        .stream()
+                                        .filter(objectId -> objectId != commentId)
+                                        .collect(Collectors.toList());
+                                objective1.setComments(comments);
+                                objectiveRepository.save(objective1);
                                 //TODO: 这里需要捕获异常吗？
                                 return ResponseEntity.noContent().build();
                             })
@@ -307,6 +317,7 @@ public class ObjectiveController {
                             .map(objective1 -> {
                                 List<ObjectId> events = Optional.ofNullable(objective1.getEvents())
                                         .orElse(new ArrayList<>());
+                                event.setObjectiveId(objectiveId);
                                 events.add(eventRepository.insert(event).getId());
                                 objective1.setEvents(events);
                                 return new ResponseEntity<>(objectiveRepository.save(objective1), HttpStatus.CREATED);
@@ -369,7 +380,10 @@ public class ObjectiveController {
                     return Optional.of(objective)
                             .filter(objective1 -> objective1.getUserId().equals(userId))
                             .filter(objective1 -> objective1.getEvents().contains(eventId))
-                            .map(objective1 -> new ResponseEntity<>(eventRepository.save(event), HttpStatus.OK))
+                            .map(objective1 -> {
+                                event.setObjectiveId(objectiveId);
+                                return new ResponseEntity<>(eventRepository.save(event), HttpStatus.OK);
+                            })
                             .orElseThrow(UnauthorizedException::new);
                 })
                 .orElseThrow(UnauthenticatedException::new);
@@ -389,6 +403,13 @@ public class ObjectiveController {
                             .filter(objective1 -> objective1.getEvents().contains(eventId))
                             .map(objective1 -> {
                                 eventRepository.delete(eventId);
+                                List<ObjectId> events = Optional.ofNullable(objective1.getEvents())
+                                        .orElse(new ArrayList<>());
+                                events = events.stream()
+                                        .filter(objectId -> objectId != eventId)
+                                        .collect(Collectors.toList());
+                                objective1.setEvents(events);
+                                objectiveRepository.save(objective1);
                                 return ResponseEntity.noContent().build();
                             })
                             .orElseThrow(UnauthorizedException::new);
