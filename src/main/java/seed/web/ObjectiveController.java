@@ -275,9 +275,9 @@ public class ObjectiveController {
     }
 
     @RequestMapping(method = DELETE, value = "/{objectiveId}/comment/{commentId}")
-    ResponseEntity<?> deleteComments(@PathVariable ObjectId objectiveId,
-                                     @PathVariable ObjectId commentId,
-                                     HttpSession httpSession) {
+    ResponseEntity<?> deleteComment(@PathVariable ObjectId objectiveId,
+                                    @PathVariable ObjectId commentId,
+                                    HttpSession httpSession) {
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {

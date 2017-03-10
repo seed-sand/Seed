@@ -22,6 +22,7 @@ import seed.domain.Comment;
 import seed.domain.Event;
 import seed.domain.Objective;
 import seed.domain.User;
+import seed.repository.CommentRepository;
 import seed.repository.EventRepository;
 import seed.repository.ObjectiveRepository;
 import seed.repository.UserRepository;
@@ -61,6 +62,8 @@ public class ObjectiveControllerTest {
 
     private  Event event2;
 
+    private  Comment comment;
+
     private HashMap<String, Object> sessionAttr;
 
     @Autowired
@@ -68,6 +71,9 @@ public class ObjectiveControllerTest {
 
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -99,6 +105,7 @@ public class ObjectiveControllerTest {
         objective = new Objective("tech");
         Event event1 = new Event("drink", new DateTime(2019, 3, 4, 5, 6, 7), true);
         Event event2 = new Event("eat", new DateTime(2019, 3, 4, 6, 6, 7), true);
+        comment = commentRepository.insert(new Comment(user.getId(), "comment for my own."));
         objective.setUserId(user.getId());
         objective.setDescription("objectives for tech");
         objective.setDeadline(new DateTime(2019, 2, 1, 8, 2, 0));
@@ -106,13 +113,13 @@ public class ObjectiveControllerTest {
         objective.setStatus(true);
         event1.setObjectiveId(objective.getId());
         event2.setObjectiveId(objective.getId());
+        this.event1 = eventRepository.insert(event1);
+        this.event2 = eventRepository.insert(event2);
         List<ObjectId> events = new ArrayList<>();
         events.add(event1.getId());
         events.add(event2.getId());
         objective.setEvents(events);
         this.objective = objectiveRepository.insert(objective);
-        this.event1 = eventRepository.insert(event1);
-        this.event2 = eventRepository.insert(event2);
 
         //维持登录态
         sessionAttr = new HashMap<String, Object>();
@@ -222,7 +229,8 @@ public class ObjectiveControllerTest {
 
     @Test
     public void comment() throws Exception {
-        Comment comment = new Comment(user.getId(), "comment for my own.");
+        commentRepository.deleteAll();
+        this.comment.setId(null);
         mockMvc.perform(post("/objective/" + objective.getId() + "/comment")
                 .sessionAttrs(sessionAttr)
                 .content(this.json(comment))
@@ -233,11 +241,12 @@ public class ObjectiveControllerTest {
 
     @Test
     public void getComments() throws Exception{
-        Comment comment1 = new Comment(user.getId(),"The first");
-        Comment comment2 = new Comment(user.getId(),"The second");
-        comment1.setObjectiveId(objective.getId());
-        comment2.setObjectiveId(objective.getId());
-        mockMvc.perform(get("/objective/" + objective.getId() + "comment")
+        comment.setObjectiveId(objective.getId());
+        List<ObjectId> comments = objective.getComments();
+        comments.add(comment.getId());
+        objective.setComments(comments);
+        objectiveRepository.save(objective);
+        mockMvc.perform(get("/objective/" + objective.getId() + "/comment")
                 .sessionAttrs(sessionAttr)
                 .param("page","0")
                 .param("size","7")
@@ -248,7 +257,6 @@ public class ObjectiveControllerTest {
 
     @Test
     public void deleteComments() throws Exception{
-        Comment comment = new Comment(user.getId(), "GOOD.");
         comment.setObjectiveId(objective.getId());
         mockMvc.perform(delete("/objective/" + objective.getId() + "/comment/" + comment.getId())
                 .sessionAttrs(sessionAttr))
@@ -258,6 +266,8 @@ public class ObjectiveControllerTest {
 
     @Test
     public void event() throws Exception {
+        eventRepository.deleteAll();
+        event1.setId(null);
         mockMvc.perform(post("/objective/" + objective.getId() + "/event")
                 .sessionAttrs(sessionAttr)
                 .content(this.json(event1))
