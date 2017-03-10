@@ -99,6 +99,8 @@ public class ObjectiveControllerTest {
 
         this.objectiveRepository.deleteAll();
         this.userRepository.deleteAll();
+        this.commentRepository.deleteAll();
+        this.eventRepository.deleteAll();
 
         this.user = userRepository.insert(new User("Tom", "Tom@testUser.com", "123456", false));
 
@@ -328,6 +330,8 @@ public class ObjectiveControllerTest {
     public void tearDown() {
         this.userRepository.deleteAll();
         this.objectiveRepository.deleteAll();
+        this.commentRepository.deleteAll();
+        this.eventRepository.deleteAll();   
     }
 
 }
