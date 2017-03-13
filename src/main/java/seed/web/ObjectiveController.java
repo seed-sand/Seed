@@ -143,7 +143,7 @@ public class ObjectiveController {
                              @RequestParam(value = "sort", defaultValue = "ASC") Sort.Direction direction ,
                              @RequestParam(value = "key", defaultValue = "title") String key,
                              @RequestParam(value = "value") String value,
-                             HttpSession httpSession
+                             HttpSession httpSession){
         ObjectId userId = (ObjectId) httpSession.getAttribute("userId");
         return userRepository.findById(userId)
                 .map(user -> {
